@@ -1,0 +1,16 @@
+{
+  "name": "new-game-project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "lit-html": "^3.2.1",
+    "rxjs": "^7.8.1"
+  }
+}
