@@ -1,16 +1,17 @@
 using Godot;
 using System;
 
-
-public partial class CircleNode2D : Godot.Node2D
+public partial class SingleHeightNode2D : Node2D
 {
-	public override void _Draw()
+	private int _height = 0;
+	
+	private int GetHeight()
 	{
-		this.DrawCircle(new Vector2(0f, 0f), 3f, new Color(1, 1, 1, 1));
+		return _height;
 	}
 }
 
-public partial class TileMapLayer : Godot.TileMapLayer
+public partial class TileMapLayerTerrain : TileMapLayer
 {
   	[Signal]
   	public delegate void VertexClickEventHandler(Node2D cellDigits, int vertex);
@@ -49,7 +50,6 @@ public partial class TileMapLayer : Godot.TileMapLayer
 		var angle = this._NormalizedAtan2(digitsLocalCoords[1], digitsLocalCoords[0]);
 		var vertex = Math.Floor((angle / (Math.PI / 3)) + Math.PI / 6) % 6 + 1;
 		
-		GD.Print("input callback");
 		EmitSignal(SignalName.VertexClick, digits, vertex);
 	}
 	
@@ -79,8 +79,6 @@ public partial class TileMapLayer : Godot.TileMapLayer
 	
 	public override void _Ready()
 	{
-		VertexClick += (cellDigits, vertex) => GD.Print("VertexClick", vertex);
-		
 		var cells = new Node2D();
 		cells.Name = "cells";
 		
@@ -97,6 +95,7 @@ public partial class TileMapLayer : Godot.TileMapLayer
 			digits.Name = $"{mapCoords}";
 			digits.SetPosition(cellCoordsLocal);
 			
+			// This block isn't needed and should be pulled out into another TileMapLayer
 			var centerLabel = this._CreateLabel($"{0}");
 			digits.AddChild(centerLabel);
 			
@@ -116,7 +115,12 @@ public partial class TileMapLayer : Godot.TileMapLayer
 		}
 		
 		this.AddChild(cells);
-		GD.Print(cells.Position);
+	}
+
+	public Godot.Collections.Array<Node> GetCells()
+	{
+		var cells = GetNode("cells");
+		return cells.GetChildren();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
