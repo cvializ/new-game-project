@@ -11,7 +11,10 @@ public partial class CircleNode2D : Godot.Node2D
 }
 
 public partial class TileMapLayer : Godot.TileMapLayer
-{	
+{
+  	[Signal]
+  	public delegate void VertexClickEventHandler(Node2D cellDigits, int vertex);
+
 	private double _NormalizedAtan2(double y, double x)
 	{
 		var angle = -Math.Atan2(y, x);
@@ -39,14 +42,15 @@ public partial class TileMapLayer : Godot.TileMapLayer
 		var length = Math.Sqrt(digitsLocalCoords.X * digitsLocalCoords.X + digitsLocalCoords.Y * digitsLocalCoords.Y);
 		
 		if (length < 10f) {
-			GD.Print("vertex", 0);
+			EmitSignal(SignalName.VertexClick, digits, 0);
 			return;
 		}
 		
 		var angle = this._NormalizedAtan2(digitsLocalCoords[1], digitsLocalCoords[0]);
 		var vertex = Math.Floor((angle / (Math.PI / 3)) + Math.PI / 6) % 6 + 1;
 		
-		GD.Print("vertex", vertex);
+		GD.Print("input callback");
+		EmitSignal(SignalName.VertexClick, digits, vertex);
 	}
 	
 	private Node2D _CreateLabel(String text)
@@ -75,6 +79,8 @@ public partial class TileMapLayer : Godot.TileMapLayer
 	
 	public override void _Ready()
 	{
+		VertexClick += (cellDigits, vertex) => GD.Print("VertexClick", vertex);
+		
 		var cells = new Node2D();
 		cells.Name = "cells";
 		
