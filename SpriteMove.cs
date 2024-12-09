@@ -1,8 +1,6 @@
 using Godot;
 using System;
 
-using Godot;
-
 public partial class SpriteMove : Sprite2D
 {
 	private float _speed = 400;

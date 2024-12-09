@@ -1,15 +1,6 @@
 using Godot;
 using System;
-
-public partial class SingleHeightNode2D : Node2D
-{
-	private int _height = 0;
-	
-	private int GetHeight()
-	{
-		return _height;
-	}
-}
+using System.Linq;
 
 public partial class TileMapLayerTerrain : TileMapLayer
 {
@@ -55,20 +46,21 @@ public partial class TileMapLayerTerrain : TileMapLayer
 	
 	private Node2D _CreateLabel(String text)
 	{
-		var container = new Node2D();
-		var label = new Label();
-		var theme = (Theme)ResourceLoader.Load("res://new_theme.tres", "Theme");
-		var size = theme.DefaultFont.GetStringSize(text);
-		
-		label.SetTheme(theme);
-		label.SetText(text);
-		
-		label.SetPosition(new Vector2(-3, -7));
-		label.SetZIndex(1);
-		
-		container.AddChild(label);
-		
-		return container;
+		return LabelUtils.CreateLabel(text);
+		//var container = new Node2D();
+		//var label = new Label();
+		//var theme = (Theme)ResourceLoader.Load("res://new_theme.tres", "Theme");
+		//var size = theme.DefaultFont.GetStringSize(text);
+		//
+		//label.SetTheme(theme);
+		//label.SetText(text);
+		//
+		//label.SetPosition(new Vector2(-3, -7));
+		//label.SetZIndex(1);
+		//
+		//container.AddChild(label);
+		//
+		//return container;
 	}
 	
 	private Node2D _GetCellDigitsNode(Vector2 mapCoords)
@@ -87,7 +79,7 @@ public partial class TileMapLayerTerrain : TileMapLayer
 		
 		for (int i = 0; i < usedCells.Count; i++) 
 		{			
-			var digits = new CircleNode2D();
+			var digits = new Node2D();
 			
 			var mapCoords = usedCells[i];
 			var cellCoordsLocal = this.MapToLocal(mapCoords);
@@ -96,21 +88,21 @@ public partial class TileMapLayerTerrain : TileMapLayer
 			digits.SetPosition(cellCoordsLocal);
 			
 			// This block isn't needed and should be pulled out into another TileMapLayer
-			var centerLabel = this._CreateLabel($"{0}");
-			digits.AddChild(centerLabel);
-			
-			for (int j = 0; j < 6; j++) {
-				var label = this._CreateLabel($"{j + 1}");
-				
-				var angle = 2 * Math.PI / 6 * j;
-				
-				var adjacent = (tileSize[0] / 2.5) * Math.Cos(-angle);
-				var opposite = (tileSize[1] / 2.5) * Math.Sin(-angle);
-				
-				label.SetPosition(new Vector2((float)adjacent, (float)opposite));
-				digits.AddChild(label);
-			}
-			
+			//var centerLabel = this._CreateLabel($"{0}");
+			//digits.AddChild(centerLabel);
+			//
+			//for (int j = 0; j < 6; j++) {
+				//var label = this._CreateLabel($"{j + 1}");
+				//
+				//var angle = 2 * Math.PI / 6 * j;
+				//
+				//var adjacent = (tileSize[0] / 2.5) * Math.Cos(-angle);
+				//var opposite = (tileSize[1] / 2.5) * Math.Sin(-angle);
+				//
+				//label.SetPosition(new Vector2((float)adjacent, (float)opposite));
+				//digits.AddChild(label);
+			//}
+			//
 			cells.AddChild(digits);
 		}
 		
@@ -120,7 +112,14 @@ public partial class TileMapLayerTerrain : TileMapLayer
 	public Godot.Collections.Array<Node> GetCells()
 	{
 		var cells = GetNode("cells");
-		return cells.GetChildren();
+		// There must be a better way than thus to cast
+		// between Generic Godot arrays
+		Godot.Collections.Array<Node> children = cells.GetChildren();
+		return children;
+		// Saving for the short term:
+		//var enumerable = (System.Collections.Generic.IEnumerable<Node>)children;
+		//var array = enumerable.Select(x => (SingleHeightNode2D)x).ToArray();
+		//return new Godot.Collections.Array<SingleHeightNode2D>(array);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
