@@ -36,21 +36,21 @@ public partial class TileMapLayerHeight : TileMapLayer
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("TileMapLayerTerrain");
-		tileMapLayerTerrain.VertexClick += (cellDigits, vertex) => {
+		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+		tileMapLayerTerrain.VertexClick += (cell, vertex) => {
 			GD.Print("Clicked one hex");
-			var height = (SingleHeightNode2D)cellDigits.GetNode("height");
+			var height = cell.GetNode<SingleHeightNode2D>("height");
 			height.SetHeight(height.GetHeight() + 1);
 		};
 		
 		
-		var cells = tileMapLayerTerrain.GetCells();
+		var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells").GetCells();
 		foreach (Node2D cell in cells) {
 			var height = new SingleHeightNode2D();
 			height.Name = "height";
-			height.SetHeight(1);
-		
 			cell.AddChild(height);
+			
+			height.SetHeight(1);
 		}
 	}
 
