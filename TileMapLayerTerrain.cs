@@ -27,7 +27,8 @@ public partial class TileMapLayerTerrain : TileMapLayer
 		var globalCoords = mouseEvent.Position;
 		var localCoords = this.ToLocal(globalCoords);
 		var mapCoords = this.LocalToMap(localCoords);
-				
+		
+		// Not circular because this is called async
 		var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
 		var cell = cells.GetCell(mapCoords);
 		var cellLocalCoords = cell.ToLocal(globalCoords);

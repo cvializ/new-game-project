@@ -31,18 +31,21 @@ public partial class SingleHeightNode2D : Node2D
 	}
 }
 
-public partial class TileMapLayerHeight : TileMapLayer
+// Create a mapping of vertices based on the cells Vector2
+// Following the sawtooth line (0, 0), (1, 0) etc
+// 
+
+public partial class TileMapLayerHeight : Node
 {
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
 		tileMapLayerTerrain.VertexClick += (cell, vertex) => {
-			GD.Print("Clicked one hex");
+			GD.Print("Clicked one hex", cell);
 			var height = cell.GetNode<SingleHeightNode2D>("height");
 			height.SetHeight(height.GetHeight() + 1);
 		};
-		
 		
 		var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells").GetCells();
 		foreach (Node2D cell in cells) {

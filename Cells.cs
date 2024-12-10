@@ -7,7 +7,6 @@ public partial class Cells : Node
 	public override void _Ready()
 	{
 		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
-		GD.Print("tileMapLayerTerrain",tileMapLayerTerrain);
 		var tileSize = tileMapLayerTerrain.GetTileSize();
 		var usedCells = tileMapLayerTerrain.GetUsedCells();
 		
@@ -23,6 +22,7 @@ public partial class Cells : Node
 			this.AddChild(cell);
 		}
 	}
+
 	
 	public Godot.Collections.Array<Node> GetCells()
 	{

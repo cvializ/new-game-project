@@ -8,25 +8,24 @@ public partial class HexLabel : Node2D
 	public HexLabel(Vector2 _tileSize)
 	{
 		this._tileSize = _tileSize;
-		GD.Print(this._tileSize);
 	}
 	
 	public override void _Ready()
 	{
-		var centerLabel = LabelUtils.CreateLabel("0");
-		this.AddChild(centerLabel);
-		
-		for (int j = 0; j < 6; j++) {
-			var label = LabelUtils.CreateLabel($"{j + 1}");
-			
-			var angle = 2 * Math.PI / 6 * j;
-			
-			var adjacent = (this._tileSize[0] / 2.5) * Math.Cos(-angle);
-			var opposite = (this._tileSize[1] / 2.5) * Math.Sin(-angle);
-			
-			label.SetPosition(new Vector2((float)adjacent, (float)opposite));
-			this.AddChild(label);
-		}
+		//var centerLabel = LabelUtils.CreateLabel("0");
+		//this.AddChild(centerLabel);
+		//
+		//for (int j = 0; j < 6; j++) {
+			//var label = LabelUtils.CreateLabel($"{j + 1}");
+			//
+			//var angle = 2 * Math.PI / 6 * j;
+			//
+			//var adjacent = (this._tileSize[0] / 2.5) * Math.Cos(-angle);
+			//var opposite = (this._tileSize[1] / 2.5) * Math.Sin(-angle);
+			//
+			//label.SetPosition(new Vector2((float)adjacent, (float)opposite));
+			//this.AddChild(label);
+		//}
 	}
 }
 
@@ -39,7 +38,6 @@ public partial class VertexLabel2D : Node2D
 		GD.Print("Alive 2");
 		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");		
 		var tileSize = tileMapLayerTerrain.GetTileSize();
-		GD.Print(tileSize);
 		
 		var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells").GetCells();
 		foreach (Node2D cell in cells) {
