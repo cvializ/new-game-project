@@ -53,10 +53,15 @@ public partial class Vertices : Node
 		var fudge = 2 * Math.PI / 3;
 		var angle = fudge + (2 * Math.PI / 6 * segmentIndex);
 		
+		// Use -angle to adjust for Godot's coordinate being different
+		// than my mental ones
 		var adjacent = radius * Math.Cos(-angle);
 		var opposite = radius * Math.Sin(-angle);
 		return new Vector2((float)adjacent, (float)opposite);
 	}
+	
+	// TODO: Add center vertex so tiles can have a height themselves? Optional
+	// TODO: I need to start writing tests
 	
 	private static Vector4I[] TILE_TO_VERTEX_INDEX_CONVERSION = new Vector4I[] {
 		new Vector4I(0, 0, 0, 0), // NW

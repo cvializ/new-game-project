@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class SingleHeightNode2D : Node
+public partial class SingleHeightNode2D : Node2D
 {
 	private int _height = 0;
 	private Node2D _label;
