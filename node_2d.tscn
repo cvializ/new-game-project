@@ -1,16 +1,43 @@
-[gd_scene load_steps=15 format=4 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=11 format=4 uid="uid://coeyoxva7s7xo"]
 
-[ext_resource type="Script" path="res://YourCustomScript.cs" id="1_087fx"]
-[ext_resource type="Texture2D" uid="uid://b0vkx4g0nab8b" path="res://icon.svg" id="2_ut8mg"]
-[ext_resource type="Script" path="res://SpriteMove.cs" id="3_8xqr5"]
 [ext_resource type="Script" path="res://VertexLabel2D.cs" id="4_l0fll"]
 [ext_resource type="Texture2D" uid="uid://dqrgcabe77r76" path="res://tiles/tileset.png" id="5_66dj5"]
 [ext_resource type="Script" path="res://TileMapLayerTerrain.cs" id="6_0o22g"]
 [ext_resource type="Script" path="res://Cells.cs" id="6_kpry7"]
-[ext_resource type="Script" path="res://TileMapLayerHeight.cs" id="6_o31wr"]
 [ext_resource type="Script" path="res://Vertices.cs" id="6_xgmhd"]
 [ext_resource type="Script" path="res://HexTriangle.cs" id="8_6uvwl"]
 [ext_resource type="Script" path="res://ReadyLogger.cs" id="9_etofa"]
+
+[sub_resource type="CSharpScript" id="CSharpScript_441vn"]
+script/source = "using Godot;
+
+public partial class YourCustomScript : Node
+{
+	[Export]
+	public Resource Stats;
+	
+	// Member variables here, example:
+	private int _a = 2;
+	private string _b = \"textvar\";
+
+	public override void _Ready()
+	{
+		if (Stats is ExampleProject.MapOneTerrain botStats)
+		{
+			GD.Print(botStats.Health); // Prints '10'.
+		}
+		// Called every time the node is added to the scene.
+		// Initialization here.
+		GD.Print(\"Hello from C# to Godot :)\");
+	}
+
+	public override void _Process(double delta)
+	{
+		// Called every frame. Delta is time since the last frame.
+		// Update game logic here.
+	}
+}
+"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gkok"]
 texture = ExtResource("5_66dj5")
@@ -40,10 +67,8 @@ tile_offset_axis = 1
 tile_size = Vector2i(64, 55)
 sources/4 = SubResource("TileSetAtlasSource_3gkok")
 
-[sub_resource type="Theme" id="Theme_mwisb"]
-
 [node name="Root2D" type="Node2D"]
-script = ExtResource("1_087fx")
+script = SubResource("CSharpScript_441vn")
 
 [node name="TerrainSystem" type="Node2D" parent="."]
 
@@ -55,34 +80,13 @@ script = ExtResource("6_0o22g")
 [node name="Cells" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_kpry7")
 
-[node name="TileMapLayerHeight" type="Node" parent="TerrainSystem"]
-script = ExtResource("6_o31wr")
+[node name="Height" type="Node" parent="TerrainSystem"]
 
 [node name="Vertices" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_xgmhd")
 
 [node name="VertexLabel2D" type="Node2D" parent="."]
 script = ExtResource("4_l0fll")
-
-[node name="Label" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 23.0
-theme = SubResource("Theme_mwisb")
-text = "Wow
-"
-
-[node name="Button" type="Button" parent="."]
-offset_right = 199.0
-offset_bottom = 48.0
-text = "Hello, world!"
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(99, 129)
-texture = ExtResource("2_ut8mg")
-script = ExtResource("3_8xqr5")
-
-[node name="Timer" type="Timer" parent="Sprite2D"]
-autostart = true
 
 [node name="PolygonPractice" type="Node2D" parent="."]
 position = Vector2(320, 136)
@@ -99,5 +103,3 @@ script = ExtResource("9_etofa")
 
 [node name="ReadyLogger1" type="Node" parent="ReadyLogger"]
 script = ExtResource("9_etofa")
-
-[connection signal="pressed" from="Button" to="Sprite2D" method="OnButtonPressed"]

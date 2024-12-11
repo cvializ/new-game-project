@@ -41,7 +41,11 @@ public partial class TileMapLayerTerrain : TileMapLayer
 		}
 		
 		var angle = this._NormalizedAtan2(cellLocalCoords[1], cellLocalCoords[0]);
-		var vertex = Math.Floor((angle / (Math.PI / 3)) + Math.PI / 6) % 6 + 1;
+		//var vertex = Math.Floor((angle / (Math.PI / 3)) + Math.PI / 6) % 6;
+		var rotated = (angle + 4 * Math.PI / 3) % (2 * Math.PI);
+		var vertex = Math.Round(rotated / (Math.PI / 3));
+		
+		GD.Print($"vertex click {vertex}");
 		
 		EmitSignal(SignalName.VertexClick, cell, vertex);
 	}
@@ -53,10 +57,5 @@ public partial class TileMapLayerTerrain : TileMapLayer
 	
 	public override void _Ready()
 	{		
-	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
-	{
 	}
 }

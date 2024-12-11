@@ -3,7 +3,6 @@ using System;
 
 public partial class Cells : Node
 {
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");

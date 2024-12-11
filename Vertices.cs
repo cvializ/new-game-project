@@ -1,13 +1,72 @@
 using Godot;
 using System;
 
-public partial class VertexNode : Node2D
+public partial class Vertex : Node2D
 {
-
+	
+	private int _height;
+	private Node2D _label;
+	private Vector4I _coords;
+	
+	public Vertex(): this(new Vector4I(0, 0, 0, 0), 0) {}
+	
+	public Vertex(Vector4I coords, int height)
+	{
+		_coords = coords;
+		_height = height;
+	}
+	
+	public override void _Ready()
+	{
+		this._label = LabelUtils.CreateLabel($"{this._height}");
+		this.AddChild(this._label);
+	}
+	
+	private void _UpdateLabel()
+	{
+		this.RemoveChild(this._label);
+		this._label = LabelUtils.CreateLabel($"{this._height}");
+		this.AddChild(this._label);
+	}
+	
+	public int GetHeight()
+	{
+		return _height;
+	}
+	
+	public void SetHeight(int height)
+	{
+		_height = height;
+		this._UpdateLabel();
+	}
 }
 
 public partial class Vertices : Node
-{
+{	
+	private Godot.Collections.Dictionary<Vector4I, Vertex> vertexDict = new Godot.Collections.Dictionary<Vector4I, Vertex>();
+	
+	private Vector2 _GetCirclePoint(int segmentIndex)
+	{
+		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+		var tileSize = tileMapLayerTerrain.GetTileSize();
+		var radius = Math.Max(tileSize[0], tileSize[1]) / 2;
+		var fudge = 2 * Math.PI / 3;
+		var angle = fudge + (2 * Math.PI / 6 * segmentIndex);
+		
+		var adjacent = radius * Math.Cos(-angle);
+		var opposite = radius * Math.Sin(-angle);
+		return new Vector2((float)adjacent, (float)opposite);
+	}
+	
+	private static Vector4I[] TILE_TO_VERTEX_INDEX_CONVERSION = new Vector4I[] {
+		new Vector4I(0, 0, 0, 0), // NW
+		new Vector4I(-1, 0, 1, 1), // W
+		new Vector4I(0, 1, -1, 0), // SW
+		new Vector4I(0, 0, 0, 1), // SE
+		new Vector4I(1, 0, -1, 0), // E
+		new Vector4I(0, -1, 1, 1) // NE
+	};
+	
 	public static Vector2I CubeToOddQ(Vector3I hex)
 	{
 		var q = hex.X;
@@ -27,51 +86,64 @@ public partial class Vertices : Node
 		var r = row - (col - (col&1)) / 2;
 		return new Vector3I(q, r, -q-r);
 	}
+	
+	public static Vector4I TileToVertexCoord(Vector3I tile, int index)
+	{
+		var converter = Vertices.TILE_TO_VERTEX_INDEX_CONVERSION[index];
+		var tile4 = new Vector4I(tile.X, tile.Y, tile.Z, 0);
+		return tile4 + converter;
+	}
 
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		GD.Print("Vertices");
-		//var vertices = new Node();
-		//vertices.Name = "vertices";
+		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+		tileMapLayerTerrain.VertexClick += (cell, index) => {
+			var mapCoords = tileMapLayerTerrain.LocalToMap(cell.GetPosition());
+			var coords = Vertices.OddQToCube(mapCoords);
+			var vertexCoords = Vertices.TileToVertexCoord(coords, index);
+			
+			GD.Print("Clicked one vertex", vertexCoords);
+			var vertex = vertexDict[vertexCoords];
+			vertex.SetHeight(vertex.GetHeight() + 1);
+		};
 		
 		var tilMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+
+		var cellsNode = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
+		var cells = cellsNode.GetCells();
 		
-		var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells").GetCells();
-		foreach (Node2D cell in cells) {	
+		// Emergency! Break in case of bugs
+		//var i = 0;
+		//var m = 1;
+		foreach (Node2D cell in cells) {
+			//if (++i > m) break;
 			var mapCoords = tilMapLayerTerrain.LocalToMap(cell.GetPosition());
-			
 			var coords = Vertices.OddQToCube(mapCoords);
-			GD.Print("Coords: ", coords);
 			
-			// constant q = N/S
-			// constant r = NW/SE
-			// constant s = SW/NE
+			var vertices = new Node2D();
+			vertices.Name = "vertices";
 			
-			//if (cell.GetNode($"{coords}") ) 
-			//{
-				//continue;
-			//}
+			for (var index = 0; index < 6; index++) {
+				var vertexCoords = Vertices.TileToVertexCoord(coords, index);
+				if (vertexDict.ContainsKey(vertexCoords))
+				{
+					continue;
+				}
+				
+				var vertex = new Vertex(vertexCoords, 0);
+				vertex.SetPosition(this._GetCirclePoint(index));
+				vertices.AddChild(vertex);
+				
+				vertexDict[vertexCoords] = vertex;
+			}
 			
-			var vertex = new VertexNode();
-			vertex.Name = $"{coords}";
-			
-			var label = LabelUtils.CreateLabel($"{coords}");
-			vertex.AddChild(label);
-			
-			cell.AddChild(vertex);
+			cell.AddChild(vertices);
 		}
-		
-		//this.AddChild(vertices);
 	}
 	
-	public VertexNode GetVertex(Vector2 coord)
+	public Vertex GetVertex(Vector4I coords)
 	{
-		return GetNode<VertexNode>($"{coord}");
-	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
-	{
+		var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
+		return cells.GetNode<Vertex>($"{coords}");
 	}
 }

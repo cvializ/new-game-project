@@ -5,6 +5,8 @@ public partial class HexLabel : Node2D
 {
 	private Vector2 _tileSize;
 	
+	public HexLabel(): this(new Vector2(0, 0)) {}
+	
 	public HexLabel(Vector2 _tileSize)
 	{
 		this._tileSize = _tileSize;

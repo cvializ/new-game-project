@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class SingleHeightNode2D : Node2D
+public partial class SingleHeightNode2D : Node
 {
 	private int _height = 0;
 	private Node2D _label;
@@ -31,13 +31,8 @@ public partial class SingleHeightNode2D : Node2D
 	}
 }
 
-// Create a mapping of vertices based on the cells Vector2
-// Following the sawtooth line (0, 0), (1, 0) etc
-// 
-
-public partial class TileMapLayerHeight : Node
+public partial class Height : Node
 {
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
@@ -55,10 +50,5 @@ public partial class TileMapLayerHeight : Node
 			
 			height.SetHeight(1);
 		}
-	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
-	{
 	}
 }
