@@ -8,21 +8,21 @@ public partial class Cells : Node
 		var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
 		var tileSize = tileMapLayerTerrain.GetTileSize();
 		var usedCells = tileMapLayerTerrain.GetUsedCells();
-		
-		for (int i = 0; i < usedCells.Count; i++) 
+
+		for (int i = 0; i < usedCells.Count; i++)
 		{
 			var mapCoords = usedCells[i];
 			var cellCoordsLocal = tileMapLayerTerrain.MapToLocal(mapCoords);
-			
+
 			var cell = new Node2D();
 			cell.Name = $"{mapCoords}";
 			cell.SetPosition(cellCoordsLocal);
-			
+
 			this.AddChild(cell);
 		}
 	}
 
-	
+
 	public Godot.Collections.Array<Node> GetCells()
 	{
 		return this.GetChildren();
@@ -32,7 +32,7 @@ public partial class Cells : Node
 		//var array = enumerable.Select(x => (SingleHeightNode2D)x).ToArray();
 		//return new Godot.Collections.Array<SingleHeightNode2D>(array);
 	}
-	
+
 	public Node2D GetCell(Vector2 mapCoords)
 	{
 		return GetNode<Node2D>($"{mapCoords}");

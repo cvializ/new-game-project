@@ -25,7 +25,7 @@ public partial class SpriteMove : Sprite2D
 		GD.Print("wow");
 		SetProcess(!IsProcessing());
 	}
-	
+
 	private void OnTimerTimeout()
 	{
 		Visible = !Visible;
