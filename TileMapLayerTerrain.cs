@@ -7,6 +7,23 @@ public partial class TileMapLayerTerrain : TileMapLayer
   	[Signal]
   	public delegate void VertexClickEventHandler(Node2D cellDigits, int vertex);
 
+	private Vector2 _GetCirclePoint(int segmentIndex)
+	{
+		var angle = Math.PI / 3 * segmentIndex;
+		var adjacent = (64 / 2) * Math.Cos(2 * Math.PI - angle);
+		var opposite = (64 / 2) * Math.Sin(2 * Math.PI - angle);
+		// Clamp
+		if (opposite < -27) 
+		{
+			opposite = -27;
+		}
+		if (opposite > 27) 
+		{
+			opposite = 27;
+		}
+		return new Vector2((float)adjacent, (float)opposite);
+	}
+
 	private double _NormalizedAtan2(double y, double x)
 	{
 		var angle = -Math.Atan2(y, x);
@@ -36,12 +53,11 @@ public partial class TileMapLayerTerrain : TileMapLayer
 		var length = Math.Sqrt(cellLocalCoords.X * cellLocalCoords.X + cellLocalCoords.Y * cellLocalCoords.Y);
 		
 		if (length < 10f) {
-			EmitSignal(SignalName.VertexClick, cell, 0);
+			EmitSignal(SignalName.VertexClick, cell, 6);
 			return;
 		}
 		
 		var angle = this._NormalizedAtan2(cellLocalCoords[1], cellLocalCoords[0]);
-		//var vertex = Math.Floor((angle / (Math.PI / 3)) + Math.PI / 6) % 6;
 		var rotated = (angle + 4 * Math.PI / 3) % (2 * Math.PI);
 		var vertex = Math.Round(rotated / (Math.PI / 3));
 		

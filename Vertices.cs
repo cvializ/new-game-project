@@ -69,7 +69,8 @@ public partial class Vertices : Node
 		new Vector4I(0, 1, -1, 0), // SW
 		new Vector4I(0, 0, 0, 1), // SE
 		new Vector4I(1, 0, -1, 0), // E
-		new Vector4I(0, -1, 1, 1) // NE
+		new Vector4I(0, -1, 1, 1), // NE
+		new Vector4I(0, 0, 0, 2) // center, lame
 	};
 	
 	public static Vector2I CubeToOddQ(Vector3I hex)
@@ -118,15 +119,23 @@ public partial class Vertices : Node
 		var cells = cellsNode.GetCells();
 		
 		// Emergency! Break in case of bugs
-		//var i = 0;
-		//var m = 1;
+		var i = 0;
+		var m = 5;
 		foreach (Node2D cell in cells) {
-			//if (++i > m) break;
+			if (++i > m) break;
 			var mapCoords = tilMapLayerTerrain.LocalToMap(cell.GetPosition());
 			var coords = Vertices.OddQToCube(mapCoords);
 			
 			var vertices = new Node2D();
 			vertices.Name = "vertices";
+			
+			var centerVertexCoords = (
+				Vertices.TileToVertexCoord(coords, 0) +
+				new Vector4I(0, 0, 0, 2)
+			);
+			var centerVertex = new Vertex(centerVertexCoords, 0);
+			vertices.AddChild(centerVertex);
+			vertexDict[centerVertexCoords] = centerVertex;
 			
 			for (var index = 0; index < 6; index++) {
 				var vertexCoords = Vertices.TileToVertexCoord(coords, index);

@@ -9,6 +9,15 @@ public partial class HexTriangle : Node2D
 		var angle = Math.PI / 3 * segmentIndex;
 		var adjacent = (64 / 2) * Math.Cos(2 * Math.PI - angle);
 		var opposite = (64 / 2) * Math.Sin(2 * Math.PI - angle);
+		// Clamp
+		if (opposite < -27) 
+		{
+			opposite = -27;
+		}
+		if (opposite > 27) 
+		{
+			opposite = 27;
+		}
 		return new Vector2((float)adjacent, (float)opposite);
 	}
 	
