@@ -1,5 +1,5 @@
-using Godot;
 using System;
+using Godot;
 
 [GlobalClass]
 public partial class ReadyLogger : Godot.Node

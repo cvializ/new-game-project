@@ -1,44 +1,11 @@
-[gd_scene load_steps=12 format=4 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=9 format=4 uid="uid://coeyoxva7s7xo"]
 
-[ext_resource type="Script" path="res://VertexLabel2D.cs" id="4_l0fll"]
 [ext_resource type="Texture2D" uid="uid://dqrgcabe77r76" path="res://tiles/tileset.png" id="5_66dj5"]
 [ext_resource type="Script" path="res://Triangles.cs" id="5_uidih"]
 [ext_resource type="Script" path="res://TileMapLayerTerrain.cs" id="6_0o22g"]
 [ext_resource type="Script" path="res://Cells.cs" id="6_kpry7"]
 [ext_resource type="Script" path="res://Vertices.cs" id="6_xgmhd"]
-[ext_resource type="Script" path="res://HexTriangle.cs" id="8_6uvwl"]
 [ext_resource type="Script" path="res://ReadyLogger.cs" id="9_etofa"]
-
-[sub_resource type="CSharpScript" id="CSharpScript_441vn"]
-script/source = "using Godot;
-
-public partial class YourCustomScript : Node
-{
-	[Export]
-	public Resource Stats;
-	
-	// Member variables here, example:
-	private int _a = 2;
-	private string _b = \"textvar\";
-
-	public override void _Ready()
-	{
-		if (Stats is ExampleProject.MapOneTerrain botStats)
-		{
-			GD.Print(botStats.Health); // Prints '10'.
-		}
-		// Called every time the node is added to the scene.
-		// Initialization here.
-		GD.Print(\"Hello from C# to Godot :)\");
-	}
-
-	public override void _Process(double delta)
-	{
-		// Called every frame. Delta is time since the last frame.
-		// Update game logic here.
-	}
-}
-"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gkok"]
 texture = ExtResource("5_66dj5")
@@ -69,12 +36,11 @@ tile_size = Vector2i(64, 55)
 sources/4 = SubResource("TileSetAtlasSource_3gkok")
 
 [node name="Root2D" type="Node2D"]
-script = SubResource("CSharpScript_441vn")
 
 [node name="TerrainSystem" type="Node2D" parent="."]
 
 [node name="TileMapLayerTerrain" type="TileMapLayer" parent="TerrainSystem"]
-tile_map_data = PackedByteArray("AAAEAAIABAAAAAAAAAAEAAMABAAAAAAAAAAEAAQABAAAAAAAAAAEAAUABAAAAAAAAAAEAAYABAAAAAAAAAAEAAcABAAAAAAAAAAFAAIABAAAAAAAAAAFAAMABAAAAAAAAAAFAAQABAAAAAAAAAAFAAUABAAAAAAAAAAFAAYABAAAAAAAAAAFAAcABAAAAAAAAAAGAAIABAAAAAAAAAAGAAMABAAAAAAAAAAGAAQABAAAAAAAAAAGAAYABAAAAAAAAAAGAAcABAAAAAAAAAAHAAIABAAAAAAAAAAHAAMABAAAAAAAAAAHAAQABAAFAAEAAAAHAAUABAADAAEAAAAHAAYABAAAAAAAAAAHAAcABAAAAAAAAAAIAAIABAAAAAAAAAAIAAQABAACAAAAAAAIAAUABAABAAAAAAAIAAYABAAAAAAAAAAIAAcABAAAAAAAAAAJAAIABAAAAAAAAAAJAAMABAAAAAAAAAAJAAQABAAAAAAAAAAJAAUABAABAAEAAAAJAAYABAAAAAAAAAAJAAcABAAAAAAAAAAKAAIABAAAAAAAAAAKAAMABAAAAAAAAAAKAAQABAAAAAAAAAAKAAUABAABAAAAAAAKAAYABAAAAAAAAAAKAAcABAAAAAAAAAALAAIABAAAAAAAAAALAAMABAAAAAAAAAALAAQABAAAAAAAAAALAAUABAABAAEAAAALAAYABAAAAAAAAAALAAcABAAAAAAAAAAMAAIABAAAAAAAAAAMAAMABAAAAAAAAAAMAAQABAAAAAAAAAAMAAUABAABAAAAAAAMAAYABAAAAAAAAAAMAAcABAAAAAAAAAANAAIABAAAAAAAAAANAAMABAAAAAAAAAANAAQABAAAAAAAAAANAAUABAAAAAAAAAANAAYABAAAAAAAAAANAAcABAAAAAAAAAAOAAIABAAAAAAAAAAOAAMABAAAAAAAAAAOAAQABAAAAAAAAAAOAAUABAAAAAAAAAAOAAYABAAAAAAAAAAOAAcABAAAAAAAAAAPAAIABAAAAAAAAAAPAAMABAAAAAAAAAAPAAQABAAAAAAAAAAPAAUABAAAAAAAAAAPAAYABAAAAAAAAAAPAAcABAAAAAAAAAAQAAIABAAAAAAAAAAQAAMABAAAAAAAAAAQAAQABAAAAAAAAAAQAAUABAAAAAAAAAAQAAYABAAAAAAAAAAQAAcABAAAAAAAAAARAAIABAAAAAAAAAARAAMABAAAAAAAAAARAAQABAAAAAAAAAARAAUABAAAAAAAAAARAAYABAAAAAAAAAARAAcABAAAAAAAAAAGAAUABAAAAAAAAAAEAAgABAAAAAAAAAAFAAgABAAAAAAAAAAAAAAABAAAAAAAAAABAAAABAAAAAAAAAACAAAABAAAAAAAAAADAAAABAAAAAAAAAAEAAAABAAAAAAAAAAFAAAABAAAAAAAAAAGAAAABAAAAAAAAAAHAAAABAAAAAAAAAAIAAAABAAAAAAAAAAJAAAABAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAABAAAABAAAAAAAAAACAAEABAAAAAAAAAABAAEABAAAAAAAAAABAAIABAAAAAAAAAABAAMABAAAAAAAAAABAAQABAAAAAAAAAABAAUABAAAAAAAAAA=")
 tile_set = SubResource("TileSet_rjn3j")
 script = ExtResource("6_0o22g")
 
@@ -89,12 +55,8 @@ script = ExtResource("6_xgmhd")
 [node name="Triangles" type="Node" parent="TerrainSystem"]
 script = ExtResource("5_uidih")
 
-[node name="VertexLabel2D" type="Node2D" parent="."]
-script = ExtResource("4_l0fll")
-
 [node name="PolygonPractice" type="Node2D" parent="."]
-position = Vector2(320, 136)
-script = ExtResource("8_6uvwl")
+position = Vector2(168, -56)
 
 [node name="ReadyLogger" type="Node" parent="."]
 script = ExtResource("9_etofa")

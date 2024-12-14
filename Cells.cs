@@ -1,11 +1,11 @@
-using Godot;
 using System;
+using Godot;
 
 public partial class Cells : Node
 {
     public override void _Ready()
     {
-        var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
         var tileSize = tileMapLayerTerrain.GetTileSize();
         var usedCells = tileMapLayerTerrain.GetUsedCells();
 
@@ -22,20 +22,19 @@ public partial class Cells : Node
         }
     }
 
-
     public Godot.Collections.Array<Node> GetCells()
     {
         return this.GetChildren();
 
         // Saving for the short term:
-        //var enumerable = (System.Collections.Generic.IEnumerable<Node>)children;
-        //var array = enumerable.Select(x => (SingleHeightNode2D)x).ToArray();
-        //return new Godot.Collections.Array<SingleHeightNode2D>(array);
+        // var enumerable = (System.Collections.Generic.IEnumerable<Node>)children;
+        // var array = enumerable.Select(x => (SingleHeightNode2D)x).ToArray();
+        // return new Godot.Collections.Array<SingleHeightNode2D>(array);
     }
 
     public Node2D GetCell(Vector2 mapCoords)
     {
-        return GetNode<Node2D>($"{mapCoords}");
+        return this.GetNode<Node2D>($"{mapCoords}");
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.

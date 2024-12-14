@@ -1,33 +1,33 @@
-using Godot;
 using System;
+using Godot;
 
 public partial class SingleHeightNode2D : Node2D
 {
-    private int _height = 0;
-    private Node2D _label;
+    private int height = 0;
+    private Node2D label;
 
     public override void _Ready()
     {
-        this._label = LabelUtils.CreateLabel($"{this._height}");
-        this.AddChild(this._label);
+        this.label = LabelUtils.CreateLabel($"{this.height}");
+        this.AddChild(this.label);
     }
 
-    private void _UpdateLabel()
+    private void UpdateLabel()
     {
-        this.RemoveChild(this._label);
-        this._label = LabelUtils.CreateLabel($"{this._height}");
-        this.AddChild(this._label);
+        this.RemoveChild(this.label);
+        this.label = LabelUtils.CreateLabel($"{this.height}");
+        this.AddChild(this.label);
     }
 
     public int GetHeight()
     {
-        return _height;
+        return this.height;
     }
 
     public void SetHeight(int height)
     {
-        _height = height;
-        this._UpdateLabel();
+        this.height = height;
+        this.UpdateLabel();
     }
 }
 
@@ -35,15 +35,15 @@ public partial class Height : Node
 {
     public override void _Ready()
     {
-        var tileMapLayerTerrain = GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
-        tileMapLayerTerrain.VertexClick += (cell, vertex) =>
+        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+        tileMapLayerTerrain.CellClick += (cell, vertex) =>
         {
             GD.Print("Clicked one hex", cell);
             var height = cell.GetNode<SingleHeightNode2D>("height");
             height.SetHeight(height.GetHeight() + 1);
         };
 
-        var cells = GetNode<Cells>("/root/Root2D/TerrainSystem/Cells").GetCells();
+        var cells = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells").GetCells();
         foreach (Node2D cell in cells)
         {
             var height = new SingleHeightNode2D();
