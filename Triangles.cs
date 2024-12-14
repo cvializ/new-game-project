@@ -5,6 +5,8 @@ using System.Linq;
 
 public partial class Triangle : Node2D
 {
+    private Vector3 SunVector = new Vector3(0, -1, (float)Math.Sin(Math.PI / 3));
+    
     private Vertex[] _vertices;
     private Polygon2D _polygon = new Polygon2D();
     
@@ -32,19 +34,6 @@ public partial class Triangle : Node2D
             polygonPoints.Add(vertex.GetPosition());
         }
 
-        // Triangle plane Vt is normal(Vector3(points))
-        // Sun angle is Vs
-        // sun reflection is Vsr = Vs.bounce(Vt)
-        // camera vector is Vc = Vdown
-        // triangle brightness B = Vsr dot Vc?
-
-        double vectorX = 0;
-        double vectorY = 0;
-        double vectorZ = 0;
-
-        //Vector3 sunAngleDegreesFromNorth = MathUtils.
-
-
         _polygon.SetPolygon(polygonPoints.ToArray());
         _polygon.SetColor(new Color(0, 0, 0, .5f));
         
@@ -52,7 +41,27 @@ public partial class Triangle : Node2D
     }
 
     private void Update()
-    {
+    {   
+        var A = new Vector3(_polygon.Polygon[0].X, _polygon.Polygon[0].Y, _vertices[0].GetHeight());
+        var B = new Vector3(_polygon.Polygon[1].X, _polygon.Polygon[1].Y, _vertices[1].GetHeight());
+        var C = new Vector3(_polygon.Polygon[2].X, _polygon.Polygon[2].Y, _vertices[2].GetHeight());
+        // cross product of BA X BC
+        var BA = B - A;
+        var BC = B - C;
+        var normalVector = BA.Cross(BC).Normalized();
+        
+        var bounceVector = SunVector.Bounce(normalVector).Normalized();
+        var cameraVector = new Vector3(0, 0, -1);
+        
+        var brightness = bounceVector.Dot(cameraVector);
+        // Triangle plane Vt is normal(Vector3(points))
+        // Sun angle is Vs
+        // sun reflection is Vsr = Vs.bounce(Vt)
+        // camera vector is Vc = Vdown
+        // triangle brightness B = Vsr dot Vc?
+        GD.Print("WOW", normalVector, SunVector, brightness);
+        
+        _polygon.SetColor(new Color(0, 0, 0, 1 - brightness));
         
     }
 
