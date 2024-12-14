@@ -33,6 +33,11 @@ public partial class TileMapLayerTerrain : TileMapLayer
         return angle > 0 ? angle : angle + (Math.PI * 2);
     }
 
+    private void _EmitCellClickSignal(Cell cell, int vertex)
+    {
+        EmitSignal(SignalName.CellClick, cell, vertex);
+    }
+
     public override void _Input(InputEvent @event)
     {
         if (!(@event is InputEventMouseButton mouseEvent))
@@ -45,30 +50,31 @@ public partial class TileMapLayerTerrain : TileMapLayer
             return;
         }
 
-        var globalCoords = mouseEvent.Position;
+        var globalCoords = GetGlobalMousePosition();
         var localCoords = this.ToLocal(globalCoords);
         var mapCoords = this.LocalToMap(localCoords);
-
         // Not circular because this is called async
         var cells = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
-        var cell = cells.GetCell(mapCoords);
+        var cubeCoords = MathUtils.OddQToCube(mapCoords);
+        
+        var cell = cells.GetCell(cubeCoords);
         var cellLocalCoords = cell.ToLocal(globalCoords);
 
-        var length = Math.Sqrt((cellLocalCoords.X * cellLocalCoords.X) + (cellLocalCoords.Y * cellLocalCoords.Y));
+        var length = cellLocalCoords.Length();
 
-        if (length < 10f)
+        GD.Print(length);
+
+        if (length < 15f)
         {
-            this.EmitSignal(SignalName.CellClick, cell, 6);
+            _EmitCellClickSignal(cell, 6);
             return;
         }
 
         var angle = this.NormalizedAtan2(cellLocalCoords[1], cellLocalCoords[0]);
         var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
-        var vertex = Math.Round(rotated / (Math.PI / 3));
-
-        GD.Print($"vertex click {vertex}");
-
-        this.EmitSignal(SignalName.CellClick, cell, vertex);
+        var vertex = (int)Math.Round(rotated / (Math.PI / 3));
+                
+       _EmitCellClickSignal(cell, vertex);
     }
 
     public Vector2 GetTileSize()

@@ -8,14 +8,14 @@ public partial class SingleHeightNode2D : Node2D
 
     public override void _Ready()
     {
-        this.label = LabelUtils.CreateLabel($"{this.height}");
+        this.label = new MyLabel($"{this.height}");
         this.AddChild(this.label);
     }
 
     private void UpdateLabel()
     {
         this.RemoveChild(this.label);
-        this.label = LabelUtils.CreateLabel($"{this.height}");
+        this.label = new MyLabel($"{this.height}");
         this.AddChild(this.label);
     }
 

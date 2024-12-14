@@ -5,11 +5,11 @@ using Godot;
 public partial class Vertex : Node2D
 {
     [Signal]
-    public delegate void VertexClickEventHandler();
+    public delegate void VertexClickEventHandler(Vertex vertex, int height);
 
-    private int height;
-    private Node2D label;
-    private Vector4I coords;
+    private int _height;
+    private Node2D _label;
+    private Vector4I _coords;
 
     public Vertex()
         : this(new Vector4I(0, 0, 0, 0), 0)
@@ -18,39 +18,39 @@ public partial class Vertex : Node2D
 
     public Vertex(Vector4I coords, int height)
     {
-        this.coords = coords;
-        this.height = height;
+        _coords = coords;
+        _height = height;
     }
 
     public override void _Ready()
     {
         
-        this.label = LabelUtils.CreateLabel($"{this.coords.W}");
-        this.AddChild(this.label);
+        _label = LabelUtils.CreateLabel($"{_coords.W}");
+        AddChild(_label);
     }
 
     private void UpdateLabel()
     {
-        this.RemoveChild(this.label);
-        this.label = LabelUtils.CreateLabel($"{this.height}");
-        this.AddChild(this.label);
+        RemoveChild(_label);
+        _label = LabelUtils.CreateLabel($"{_height}");
+        AddChild(_label);
     }
 
     public int GetHeight()
     {
-        return this.height;
+        return _height;
     }
 
     public void SetHeight(int height)
     {
-        this.height = height;
-        this.EmitSignal(SignalName.VertexClick);
-        this.UpdateLabel();
+        _height = height;
+        EmitSignal(SignalName.VertexClick, this, height);
+        UpdateLabel();
     }
 
     public Vector4I GetCoords()
     {
-        return this.coords;
+        return _coords;
     }
 }
 
@@ -73,8 +73,6 @@ public partial class Vertices : Node
         return new Vector2((float)adjacent, (float)opposite);
     }
 
-    // TODO: Add center vertex so tiles can have a height themselves? Optional
-    // TODO: I need to start writing tests
     private static Vector4I[] TileToVertexIndexConversion = new Vector4I[]
     {
         new Vector4I(0, 0, 0, 0), // NW
@@ -90,26 +88,6 @@ public partial class Vertices : Node
     {
         var nwVertex = centerVertex - new Vector4I(0, 0, 0, 2);
         return nwVertex + TileToVertexIndexConversion[index];
-    }
-
-    public static Vector2I CubeToOddQ(Vector3I hex)
-    {
-        var q = hex.X;
-        var r = hex.Y;
-
-        var col = q;
-        var row = r + ((q - (q & 1)) / 2);
-        return new Vector2I(col, row);
-    }
-
-    public static Vector3I OddQToCube(Vector2I oddQ)
-    {
-        var col = oddQ.X;
-        var row = oddQ.Y;
-
-        var q = col;
-        var r = row - ((col - (col & 1)) / 2);
-        return new Vector3I(q, r, -q - r);
     }
 
     public static Vector4I TileToVertexCoord(Vector3I tile, int index)
@@ -144,7 +122,7 @@ public partial class Vertices : Node
         tileMapLayerTerrain.CellClick += (cell, index) =>
         {
             var mapCoords = tileMapLayerTerrain.LocalToMap(cell.GetPosition());
-            var coords = Vertices.OddQToCube(mapCoords);
+            var coords = MathUtils.OddQToCube(mapCoords);
             var vertexCoords = Vertices.TileToVertexCoord(coords, index);
 
             var vertex = this.vertexDict[vertexCoords];
@@ -156,14 +134,10 @@ public partial class Vertices : Node
         var cellsNode = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
         var cells = cellsNode.GetCells();
 
-        // Emergency! Break in case of bugs
-        //var i = 0;
-        //var m = 5;
         foreach (Node2D cell in cells)
         {
-            // if (++i > m) break;
             var mapCoords = tilMapLayerTerrain.LocalToMap(cell.GetPosition());
-            var coords = Vertices.OddQToCube(mapCoords);
+            var coords = MathUtils.OddQToCube(mapCoords);
             
             var cellGlobalPos = cell.GetGlobalPosition();
 
@@ -176,6 +150,11 @@ public partial class Vertices : Node
                 }
 
                 var vertex = new Vertex(vertexCoords, 0);
+                vertex.VertexClick += (vertex, height) =>
+                {
+                    GD.Print("vertex click", vertex.GetCoords(), height);
+                };
+
                 var vertexCircleOffset = this.GetCirclePoint(index);
                 var vertexGlobalPos = cellGlobalPos + vertexCircleOffset;
                 vertex.SetGlobalPosition(vertexGlobalPos);
@@ -192,6 +171,10 @@ public partial class Vertices : Node
             var centerVertexGlobalPos = cellGlobalPos;
             centerVertex.SetPosition(cell.GetPosition());
             
+                centerVertex.VertexClick += (vertex, height) =>
+                {
+                    GD.Print("vertex click", vertex.GetCoords(), height);
+                };
             this.AddChild(centerVertex);
             this.vertexDict[centerVertexCoords] = centerVertex;
         }

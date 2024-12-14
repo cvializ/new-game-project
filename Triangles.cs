@@ -5,9 +5,8 @@ using System.Linq;
 
 public partial class Triangle : Node2D
 {
-    private Vertex[] vertices;
-    private Node2D label;
-    private Polygon2D polygon;
+    private Vertex[] _vertices;
+    private Polygon2D _polygon = new Polygon2D();
     
     public Triangle()
         : this(new[] { new Vertex(), new Vertex(), new Vertex() })
@@ -16,51 +15,45 @@ public partial class Triangle : Node2D
 
     public Triangle(Vertex[] vertices)
     {
-        this.vertices = vertices;
+        _vertices = vertices;
     }
 
     public override void _Ready()
     {
-        for (int i = 0; i < 3; i++)
+        var firstVertexGlobalPosition = _vertices[0].GetGlobalPosition();
+        List<Vector2> polygonPoints = new List<Vector2>();
+        
+        foreach (Vertex vertex in _vertices)
         {
-            this.vertices[i].VertexClick += () =>
+            vertex.VertexClick += (vertex, height) =>
             {
                 this.Update();
             };
+            polygonPoints.Add(vertex.GetPosition());
         }
 
-        List<Vector2> polygonPoints = new List<Vector2>();
+        // Triangle plane Vt is normal(Vector3(points))
+        // Sun angle is Vs
+        // sun reflection is Vsr = Vs.bounce(Vt)
+        // camera vector is Vc = Vdown
+        // triangle brightness B = Vsr dot Vc?
+
+        double vectorX = 0;
+        double vectorY = 0;
+        double vectorZ = 0;
+
+        //Vector3 sunAngleDegreesFromNorth = MathUtils.
 
 
-        var firstVertex = this.vertices[0];
-        var secondVertex = this.vertices[1];
-        var thirdVertex = this.vertices[2];
-
-        var firstVertexGlobalPosition = firstVertex.GetGlobalPosition();
+        _polygon.SetPolygon(polygonPoints.ToArray());
+        _polygon.SetColor(new Color(0, 0, 0, .5f));
         
-        var firstVertexLocalPosition = firstVertex.GetGlobalPosition() - firstVertexGlobalPosition;
-        var secondVertexLocalPosition = secondVertex.GetGlobalPosition() - firstVertexGlobalPosition;
-        var thirdVertexLocalPosition = thirdVertex.GetGlobalPosition() - firstVertexGlobalPosition;
-
-        polygonPoints.Add(firstVertex.GetPosition());
-        polygonPoints.Add(secondVertex.GetPosition());
-        polygonPoints.Add(thirdVertex.GetPosition());
-
-        var pointsArray = polygonPoints.ToArray();
-
-        var polygon = new Polygon2D();
-        polygon.SetPolygon(pointsArray);
-        polygon.SetColor(new Color(0, 0, 0, .5f));
-        
-        this.AddChild(polygon);
+        this.AddChild(_polygon);
     }
 
     private void Update()
     {
-        GD.Print("UPDATE");
-        //this.RemoveChild(this.label);
-        ////this.label = LabelUtils.CreateLabel("T");
-        //this.AddChild(this.label);
+        
     }
 
     public Vector3 GetNormal()

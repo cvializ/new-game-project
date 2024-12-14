@@ -27,6 +27,7 @@ public partial class MyLabel : Godot.Node2D
 {
     private string _text;
     public MyLabel(): this("[todo]") {}
+    
     public MyLabel(string text)
     {
         this._text = text;

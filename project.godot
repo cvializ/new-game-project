@@ -18,3 +18,10 @@ config/icon="res://icon.svg"
 [dotnet]
 
 project/assembly_name="New Game Project"
+
+[input]
+
+move_right={
+"deadzone": 0.5,
+"events": []
+}
