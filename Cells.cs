@@ -59,9 +59,4 @@ public partial class Cells : Node
     {
         return _cellDict[cubeCoords];
     }
-
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
-    {
-    }
 }

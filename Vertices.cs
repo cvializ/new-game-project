@@ -25,15 +25,15 @@ public partial class Vertex : Node2D
     public override void _Ready()
     {
         
-        _label = LabelUtils.CreateLabel($"{_coords.W}");
-        AddChild(_label);
+        //_label = new MyLabel($"{_height}");
+        //AddChild(_label);
     }
 
     private void UpdateLabel()
     {
-        RemoveChild(_label);
-        _label = LabelUtils.CreateLabel($"{_height}");
-        AddChild(_label);
+        //RemoveChild(_label);
+        //_label = new MyLabel($"{_height}");
+        //AddChild(_label);
     }
 
     public int GetHeight()
@@ -57,6 +57,8 @@ public partial class Vertex : Node2D
 public partial class Vertices : Node
 {
     private Godot.Collections.Dictionary<Vector4I, Vertex> vertexDict = new Godot.Collections.Dictionary<Vector4I, Vertex>();
+
+    private int _maxHeight = 15;
 
     private Vector2 GetCirclePoint(int segmentIndex)
     {
@@ -133,9 +135,12 @@ public partial class Vertices : Node
 
         var cellsNode = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
         var cells = cellsNode.GetCells();
+        var heightMap = new HeightMap("./heightmap_sm.png");
 
+        var max = 0;
         foreach (Node2D cell in cells)
         {
+            //if (max++ > 6) break;
             var mapCoords = tilMapLayerTerrain.LocalToMap(cell.GetPosition());
             var coords = MathUtils.OddQToCube(mapCoords);
             
@@ -148,13 +153,16 @@ public partial class Vertices : Node
                 {
                     continue;
                 }
+ 
+                GD.Print($"Math: {MathUtils.OddQToCube(new Vector2I(159, 159))}");
 
-                var vertex = new Vertex(vertexCoords, 0);
-                vertex.VertexClick += (vertex, height) =>
-                {
-                    GD.Print("vertex click", vertex.GetCoords(), height);
-                };
+                var cube = new Vector3I(vertexCoords.X, vertexCoords.Y, vertexCoords.Z);
+                var pixelVector = MathUtils.CubeToOddQ(cube); // this needs to consider center vertices?
+                //GD.Print($"coords {coords} pixelVector {pixelVector}");
+                Color pixel = heightMap.GetImage().GetPixelv(pixelVector);
+                var height = (int)Math.Round(pixel.Luminance * _maxHeight);
 
+                var vertex = new Vertex(vertexCoords, height);
                 var vertexCircleOffset = this.GetCirclePoint(index);
                 var vertexGlobalPos = cellGlobalPos + vertexCircleOffset;
                 vertex.SetGlobalPosition(vertexGlobalPos);
@@ -167,14 +175,15 @@ public partial class Vertices : Node
             var centerVertexCoords =
                 Vertices.TileToVertexCoord(coords, 0) +
                 new Vector4I(0, 0, 0, 2);
-            var centerVertex = new Vertex(centerVertexCoords, 0);
+            
+            var pixelVectorC = MathUtils.CubeToOddQ(coords);
+            Color pixelC = heightMap.GetImage().GetPixelv(pixelVectorC);
+            var heightC = (int)Math.Round(pixelC.Luminance * _maxHeight);
+
+            var centerVertex = new Vertex(centerVertexCoords, heightC);
             var centerVertexGlobalPos = cellGlobalPos;
             centerVertex.SetPosition(cell.GetPosition());
-            
-                centerVertex.VertexClick += (vertex, height) =>
-                {
-                    GD.Print("vertex click", vertex.GetCoords(), height);
-                };
+
             this.AddChild(centerVertex);
             this.vertexDict[centerVertexCoords] = centerVertex;
         }

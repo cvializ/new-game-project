@@ -55,14 +55,10 @@ public partial class TileMapLayerTerrain : TileMapLayer
         var mapCoords = this.LocalToMap(localCoords);
         // Not circular because this is called async
         var cells = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
-        var cubeCoords = MathUtils.OddQToCube(mapCoords);
+        var cell = cells.GetCell(MathUtils.OddQToCube(mapCoords));
         
-        var cell = cells.GetCell(cubeCoords);
         var cellLocalCoords = cell.ToLocal(globalCoords);
-
         var length = cellLocalCoords.Length();
-
-        GD.Print(length);
 
         if (length < 15f)
         {
@@ -70,7 +66,8 @@ public partial class TileMapLayerTerrain : TileMapLayer
             return;
         }
 
-        var angle = this.NormalizedAtan2(cellLocalCoords[1], cellLocalCoords[0]);
+        var angle = -cellLocalCoords.Angle(); //this.NormalizedAtan2(cellLocalCoords[1], cellLocalCoords[0]);
+        //GD.Print($"my angle {angle} vs vector angle ${cellLocalCoords.Angle()}");
         var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
         var vertex = (int)Math.Round(rotated / (Math.PI / 3));
                 
@@ -84,5 +81,25 @@ public partial class TileMapLayerTerrain : TileMapLayer
 
     public override void _Ready()
     {
+        var heightMap = new HeightMap("./heightmap_sm.png");
+        var image = heightMap.GetImage();
+        var scaleFactor = 3; // Should be 3 to be 1-1 pixels to vertices
+        var cellsWide = Math.Floor((decimal)(image.GetWidth() / scaleFactor));
+        var cellsTall = Math.Floor((decimal)(image.GetHeight() / scaleFactor));
+        
+        GD.Print($"Image is {image.GetWidth()}x{image.GetHeight()}");
+        GD.Print($"Map is {cellsWide}x{cellsTall}");
+        
+        var defaultTile = new Vector2I(0, 0);
+        GD.Print($"SetCell {this.GetTileMapDataAsArray()}");
+        this.SetCell(new Vector2I(0, 0), 4, defaultTile);
+        
+        for (int i = 0; i < cellsWide; i++)
+        {
+            for (int j = 0; j < cellsTall; j++)
+            {
+                this.SetCell(new Vector2I(i, j), 4, defaultTile);
+            }
+        }
     }
 }
