@@ -31,10 +31,16 @@ public partial class CoordinateUtils : Godot.Node
     public static Vector2I Direction2E = new Vector2I(1, 0);
     public static Vector2I Direction2W = -Direction2E;
     
+    
+    
     public static Vector4I TranslateVector(Vector4I initial, int delta, Vector4I direction)
     {
-        int carries = GetCarryCount(initial.W, delta);
+        int carries = GetCarryCount(initial.W, Math.Sign(direction.W) * delta);
         GD.Print("carries", carries);
+        GD.Print("initial", initial);
+        GD.Print("direction", direction);
+        GD.Print("delta", delta);
+        //GD.Print("direction * delta", );
         //
         ////var w = vectorW.W;
         ////var carries = (w - ((w + 3) % 3)) / 3;
@@ -44,6 +50,10 @@ public partial class CoordinateUtils : Godot.Node
         ////return RotateW(result);
         //
         //return RotateW(resultNoCarry) + direction * carries; // - CarryVector4;
+        if (carries < 0)
+        {
+            direction = -direction;
+        }
         
         return RotateW(initial + (direction * delta) + CarryVector4 * carries);
         
@@ -68,9 +78,15 @@ public partial class CoordinateUtils : Godot.Node
         return unitsE + unitsSE;
     }
     
-    private static int GetCarryCount(int w_i, int d)
+    private static int GetCarryCount(int w_i, int delta)
     {        
-        int carry = (int)Math.Floor((decimal)((d + (w_i % 3)) / 3));
+        GD.Print($"GetCarryCount({w_i}, {delta})");
+        int carry = (int)Math.Floor((decimal)((Math.Abs(delta) + (w_i % 3)) / 3));
+        if (delta < 0)
+        {
+            
+            return -(int)Math.Floor((decimal)((Math.Abs(delta - 2) + (w_i % 3)) / 3));
+        }
         
         return carry;
     }
@@ -79,23 +95,29 @@ public partial class CoordinateUtils : Godot.Node
     {
         //GD.Print("WOW", Vector2IToVector4I(new Vector2I(2, 1)));
         
-        GD.Print("(0, 0, 0, 0) SE 1", TranslateVector(new Vector4I(0, 0, 0, 0), 5, Direction4SE));
-        GD.Print("(0, 0, 0, 0) SE 2", TranslateVector(new Vector4I(0, 0, 0, 1), 1, Direction4SE));
-        GD.Print("(0, 0, 0, 0) SE 3", TranslateVector(new Vector4I(0, 0, 0, 2), 1, Direction4SE));
-        GD.Print("(0, 0, 0, 0) SE 4", TranslateVector(new Vector4I(-1, -1, 2, 0), 1, Direction4SE));
+        GD.Print("(0, 0, 0, 0) NW 1", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4NW));
+        GD.Print("(0, 0, 0, 0) NW 2", TranslateVector(new Vector4I(0, 0, 0, 0), 2, Direction4NW));
+        GD.Print("(0, 0, 0, 0) NW 3", TranslateVector(new Vector4I(0, 0, 0, 0), 3, Direction4NW));
+        GD.Print("(0, 0, 0, 0) NW 4", TranslateVector(new Vector4I(0, 0, 0, 0), 4, Direction4NW));
+        
+        GD.Print("(0, 0, 0, 0) SE 1", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4SE));
+        GD.Print("(0, 0, 0, 0) SE 2", TranslateVector(new Vector4I(0, 0, 0, 0), 2, Direction4SE));
+        GD.Print("(0, 0, 0, 0) SE 3", TranslateVector(new Vector4I(0, 0, 0, 0), 3, Direction4SE));
+        GD.Print("(0, 0, 0, 0) SE 4", TranslateVector(new Vector4I(0, 0, 0, 0), 4, Direction4SE));
         //GD.Print("(0, 0, 0, 1)", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4NE));
         
         //GD.Print(Vector2IToVector4I(new Vector2I(-2, 2)));
         //GD.Print(TranslateVector(new Vector2I(1, 0), 1, Direction2SE));
         GD.Print("XXX", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4E));
         
-        //for (int w = 0; w < 10; w++)
-        //{
-            //for (int d = 0; d < 10; d++)
-            //{
-                //var carry = GetCarryCount(w, d);
-                //GD.Print($"w + d = carry {w} + {d} = {carry}");
-            //}
-        //}
+        for (int w = 0; w < 10; w++)
+        {
+            for (int d = 0; d < 10; d++)
+            {
+                var carry = GetCarryCount(w, -5 + d);
+                GD.Print($"w + d = carry {w} + {-5 + d} = {carry}");
+            }
+            GD.Print("\n");
+        }
     }
 }
