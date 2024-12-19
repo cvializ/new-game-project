@@ -57,7 +57,10 @@ public partial class Vertex : Node2D
 public partial class Vertices : Node
 {
     private Godot.Collections.Dictionary<Vector4I, Vertex> vertexDict = new Godot.Collections.Dictionary<Vector4I, Vertex>();
-
+    private int AxisQ = 1;
+    private int AxisR = 1;
+    private int AxisS = 1;
+    private int AxisW = 1;
     private int _maxHeight = 15;
 
     private Vector2 GetCirclePoint(int segmentIndex)
@@ -78,17 +81,17 @@ public partial class Vertices : Node
     private static Vector4I[] TileToVertexIndexConversion = new Vector4I[]
     {
         new Vector4I(0, 0, 0, 0), // NW
-        new Vector4I(-1, 0, 1, 1), // W
+        new Vector4I(-1, 0, 1, 2), // W
         new Vector4I(0, 1, -1, 0), // SW
-        new Vector4I(0, 0, 0, 1), // SE
+        new Vector4I(0, 0, 0, 2), // SE
         new Vector4I(1, 0, -1, 0), // E
-        new Vector4I(0, -1, 1, 1), // NE
-        new Vector4I(0, 0, 0, 2), // center, lame
+        new Vector4I(0, -1, 1, 2), // NE
+        new Vector4I(0, 0, 0, 1), // center, lame
     };
 
     public static Vector4I GetVertexFromCenter(Vector4I centerVertex, int index)
     {
-        var nwVertex = centerVertex - new Vector4I(0, 0, 0, 2);
+        var nwVertex = centerVertex - new Vector4I(0, 0, 0, 1);
         return nwVertex + TileToVertexIndexConversion[index];
     }
 
@@ -140,7 +143,7 @@ public partial class Vertices : Node
         var max = 0;
         foreach (Node2D cell in cells)
         {
-            //if (max++ > 6) break;
+            if (max++ > 6) break;
             var mapCoords = tilMapLayerTerrain.LocalToMap(cell.GetPosition());
             var coords = MathUtils.OddQToCube(mapCoords);
             
@@ -154,8 +157,6 @@ public partial class Vertices : Node
                     continue;
                 }
  
-                GD.Print($"Math: {MathUtils.OddQToCube(new Vector2I(159, 159))}");
-
                 var cube = new Vector3I(vertexCoords.X, vertexCoords.Y, vertexCoords.Z);
                 var pixelVector = MathUtils.CubeToOddQ(cube); // this needs to consider center vertices?
                 //GD.Print($"coords {coords} pixelVector {pixelVector}");
@@ -174,7 +175,7 @@ public partial class Vertices : Node
 
             var centerVertexCoords =
                 Vertices.TileToVertexCoord(coords, 0) +
-                new Vector4I(0, 0, 0, 2);
+                new Vector4I(0, 0, 0, 1);
             
             var pixelVectorC = MathUtils.CubeToOddQ(coords);
             Color pixelC = heightMap.GetImage().GetPixelv(pixelVectorC);

@@ -5,7 +5,7 @@ public partial class HeightMap : Node
 {
     private static Vector2I DefaultDimensions = new Vector2I(512, 512);
     Vector2I _dimensions = DefaultDimensions;
-    Image _image = Image.Create(DefaultDimensions.X, DefaultDimensions.Y, false, Image.Format.Rgba8); 
+    Image _image = Image.CreateEmpty(DefaultDimensions.X, DefaultDimensions.Y, false, Image.Format.Rgba8); 
 
     public HeightMap() {}
 

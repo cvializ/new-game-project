@@ -28,4 +28,9 @@ public partial class MathUtils : Godot.Node
         var r = row - ((col - (col & 1)) / 2);
         return new Vector3I(q, r, -q - r);
     }
+    
+    public static Vector2I VertexCoordsToGridCoord(Vector4I vertexCoords)
+    {
+        return new Vector2I(0, 0);
+    }
 }

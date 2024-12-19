@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=11 format=3 uid="uid://coeyoxva7s7xo"]
 
 [ext_resource type="Texture2D" uid="uid://dqrgcabe77r76" path="res://tiles/tileset.png" id="5_66dj5"]
 [ext_resource type="Script" path="res://Triangles.cs" id="5_uidih"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://Cells.cs" id="6_kpry7"]
 [ext_resource type="Script" path="res://Vertices.cs" id="6_xgmhd"]
 [ext_resource type="Script" path="res://GameCamera.cs" id="8_7n2eq"]
+[ext_resource type="Script" path="res://CoordinateUtils.cs" id="8_ea0o5"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gkok"]
 texture = ExtResource("5_66dj5")
@@ -65,3 +66,6 @@ script = ExtResource("8_7n2eq")
 _speed = 1200.0
 
 [node name="MenuSystem" type="Node" parent="."]
+
+[node name="CoordinateUtils" type="Node" parent="."]
+script = ExtResource("8_ea0o5")
