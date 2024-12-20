@@ -1,16 +1,35 @@
 using System;
 using Godot;
 
+//delta W
+//3 0
+//2 2
+//1 1
+//0 0
+//-1 2
+//-2 1
+//-3 0
+//-4 2
+
 [GlobalClass]
 public partial class CoordinateUtils : Godot.Node
 {
+    public static Vector4I WUnitVector = new Vector4I(0, 0, 0, 1);
+    
     public static Vector4I RotateW(Vector4I vector, int max = 3)
     {
         //return (new Vector4I(0, 0, 0, 1) * vector + new Vector4I(0, 0, 0, 3)) % 3;
         var xyzVector = new Vector4I(1, 1, 1, 0) * vector;
-        var wVector = (new Vector4I(0, 0, 0, 1) * vector + new Vector4I(0, 0, 0, 3)) % 3;
+        var wVector = WUnitVector * vector;
         
-        return xyzVector + wVector;
+        if (wVector.W >= 0)
+        {
+            return wVector % 3;
+        }
+        
+        var rotatedWVector = ((wVector - 2 * WUnitVector) % 3) + 2 * WUnitVector;
+        
+        return xyzVector + rotatedWVector;
     }
     public static Vector4I UnitVector4 = new Vector4I(0, 0, 0, -1);
 
@@ -35,11 +54,16 @@ public partial class CoordinateUtils : Godot.Node
     
     public static Vector4I TranslateVector(Vector4I initial, int delta, Vector4I direction)
     {
-        int carries = GetCarryCount(initial.W, Math.Sign(direction.W) * delta);
-        GD.Print("carries", carries);
+        GD.Print("TranslateVector");
+        int carryCount = GetCarryCount(initial.W, Math.Sign(direction.W) * delta);
+        GD.Print("carries", carryCount);
         GD.Print("initial", initial);
         GD.Print("direction", direction);
         GD.Print("delta", delta);
+        
+        var carryVector = CarryVector4 * carryCount;
+        GD.Print("carryVector", carryVector);
+        
         //GD.Print("direction * delta", );
         //
         ////var w = vectorW.W;
@@ -50,12 +74,12 @@ public partial class CoordinateUtils : Godot.Node
         ////return RotateW(result);
         //
         //return RotateW(resultNoCarry) + direction * carries; // - CarryVector4;
-        if (carries < 0)
-        {
-            direction = -direction;
-        }
+        //if (carries < 0)
+        //{
+            //direction = -direction;
+        //}
         
-        return RotateW(initial + (direction * delta) + CarryVector4 * carries);
+        return RotateW(initial + (direction * delta) + carryVector);
         
         
     }
@@ -112,12 +136,13 @@ public partial class CoordinateUtils : Godot.Node
         
         for (int w = 0; w < 10; w++)
         {
+            GD.Print($"RotateW {-5 + w} ", RotateW(new Vector4I(0, 0, 0, -5 + w)));
             for (int d = 0; d < 10; d++)
             {
-                var carry = GetCarryCount(w, -5 + d);
-                GD.Print($"w + d = carry {w} + {-5 + d} = {carry}");
+                //var carry = GetCarryCount(w, -5 + d);
+                //GD.Print($"w + d = carry {w} + {-5 + d} = {carry}");
             }
-            GD.Print("\n");
+            GD.Print("");
         }
     }
 }
