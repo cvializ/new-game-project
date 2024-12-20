@@ -18,30 +18,44 @@ public partial class CoordinateUtils : Godot.Node
     
     public static Vector4I RotateW(Vector4I vector, int max = 3)
     {
-        //return (new Vector4I(0, 0, 0, 1) * vector + new Vector4I(0, 0, 0, 3)) % 3;
         var xyzVector = new Vector4I(1, 1, 1, 0) * vector;
         var wVector = WUnitVector * vector;
         
         if (wVector.W >= 0)
         {
-            return wVector % 3;
+            return xyzVector + (wVector % 3);
         }
         
+        // 0, -1, -2, -3, ... => 0 2 1 0 2 1 0 ... 
         var rotatedWVector = ((wVector - 2 * WUnitVector) % 3) + 2 * WUnitVector;
+        
+        GD.Print("rotatedWVector", rotatedWVector, xyzVector);
         
         return xyzVector + rotatedWVector;
     }
-    public static Vector4I UnitVector4 = new Vector4I(0, 0, 0, -1);
-
     
     public static Vector4I CarryVector4 = new Vector4I(-1, -1, 2, 0);
     
+    // Axis
     public static Vector4I Direction4NW = new Vector4I(0, 0, 0, -1);
+    public static Vector4I CarryNW = CarryVector4;
     public static Vector4I Direction4SE = -Direction4NW;
+    public static Vector4I CarrySE = -CarryVector4;
+    
+    // Axis
     public static Vector4I Direction4SW = new Vector4I(0, 1, -1, -1);
+    public static Vector4I CarrySW = CarryVector4;
     public static Vector4I Direction4NE = -Direction4SW;
+    public static Vector4I CarryNE = -CarryVector4;
+    
+    // Axis
     public static Vector4I Direction4E = new Vector4I(1, 0, -1, -1);
+    public static Vector4I CarryE = CarryVector4;
     public static Vector4I Direction4W = -Direction4E;
+    public static Vector4I CarryW = -CarryVector4;
+    
+    
+    // Vector2
 
     public static Vector2I Direction2NW = new Vector2I(0, -1);
     public static Vector2I Direction2SE = -Direction2NW;
@@ -54,14 +68,41 @@ public partial class CoordinateUtils : Godot.Node
     
     public static Vector4I TranslateVector(Vector4I initial, int delta, Vector4I direction)
     {
+        Vector4I carry;
+        switch (direction)
+        {
+            case var value when value == Direction4NW:
+                carry = CarryNW;
+                break;
+            case var value when value == Direction4SE:
+                carry = CarrySE;
+                break;
+                
+            case var value when value == Direction4SW:
+                carry = CarrySW;
+                break;
+            case var value when value == Direction4NE:
+                carry = CarryNE;
+                break;
+                
+            case var value when value == Direction4E:
+                carry = CarryE;
+                break;
+            case var value when value == Direction4W:
+                carry = CarryW;
+                break;
+            default:
+                carry = new Vector4I(-999, -999, -999, -999);
+                break;
+        }
         GD.Print("TranslateVector");
-        int carryCount = GetCarryCount(initial.W, Math.Sign(direction.W) * delta);
-        GD.Print("carries", carryCount);
+        int carryCount = Math.Abs(GetCarryCount(initial.W, Math.Sign(direction.W) * delta));
+        GD.Print("carryCount", carryCount);
         GD.Print("initial", initial);
         GD.Print("direction", direction);
         GD.Print("delta", delta);
         
-        var carryVector = CarryVector4 * carryCount;
+        var carryVector = carry * carryCount;
         GD.Print("carryVector", carryVector);
         
         //GD.Print("direction * delta", );
@@ -78,10 +119,12 @@ public partial class CoordinateUtils : Godot.Node
         //{
             //direction = -direction;
         //}
+        GD.Print($"(initial + direction * delta) + carryVector {initial + (direction * delta) + carryVector}");
+        var result = RotateW(initial + (direction * delta) + carryVector);
         
-        return RotateW(initial + (direction * delta) + carryVector);
+        GD.Print("result: ", result);
         
-        
+        return result;
     }
     
     public static Vector2I TranslateVector(Vector2I initial, int delta, Vector2I direction)
@@ -119,15 +162,16 @@ public partial class CoordinateUtils : Godot.Node
     {
         //GD.Print("WOW", Vector2IToVector4I(new Vector2I(2, 1)));
         
-        GD.Print("(0, 0, 0, 0) NW 1", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4NW));
-        GD.Print("(0, 0, 0, 0) NW 2", TranslateVector(new Vector4I(0, 0, 0, 0), 2, Direction4NW));
-        GD.Print("(0, 0, 0, 0) NW 3", TranslateVector(new Vector4I(0, 0, 0, 0), 3, Direction4NW));
-        GD.Print("(0, 0, 0, 0) NW 4", TranslateVector(new Vector4I(0, 0, 0, 0), 4, Direction4NW));
+        //GD.Print("(0, 0, 0, 0) NW 1", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4NW));
+        //GD.Print("(0, 0, 0, 0) NW 2", TranslateVector(new Vector4I(0, 0, 0, 0), 2, Direction4NW));
+        //GD.Print("(0, 0, 0, 0) NW 3", TranslateVector(new Vector4I(0, 0, 0, 0), 3, Direction4NW));
+        //GD.Print("(0, 0, 0, 0) NW 4", TranslateVector(new Vector4I(0, 0, 0, 0), 4, Direction4NW));
         
-        GD.Print("(0, 0, 0, 0) SE 1", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4SE));
-        GD.Print("(0, 0, 0, 0) SE 2", TranslateVector(new Vector4I(0, 0, 0, 0), 2, Direction4SE));
+        //GD.Print("(0, 0, 0, 0) SE 1", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4SE));
+        //GD.Print("(0, 0, 0, 0) SE 2", TranslateVector(new Vector4I(0, 0, 0, 0), 2, Direction4SE));
         GD.Print("(0, 0, 0, 0) SE 3", TranslateVector(new Vector4I(0, 0, 0, 0), 3, Direction4SE));
-        GD.Print("(0, 0, 0, 0) SE 4", TranslateVector(new Vector4I(0, 0, 0, 0), 4, Direction4SE));
+        GD.Print("(0, 0, 0, 2) SE 1", TranslateVector(new Vector4I(0, 0, 0, 2), 1, Direction4SE));
+        //GD.Print("(0, 0, 0, 0) SE 4", TranslateVector(new Vector4I(0, 0, 0, 0), 4, Direction4SE));
         //GD.Print("(0, 0, 0, 1)", TranslateVector(new Vector4I(0, 0, 0, 0), 1, Direction4NE));
         
         //GD.Print(Vector2IToVector4I(new Vector2I(-2, 2)));
@@ -144,5 +188,7 @@ public partial class CoordinateUtils : Godot.Node
             }
             GD.Print("");
         }
+        //
+        //GD.Print(new Vector4I(1, 1, 1, 0) * new Vector4I(5, -6, 1, 3));
     }
 }
