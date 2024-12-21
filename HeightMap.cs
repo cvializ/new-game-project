@@ -18,4 +18,15 @@ public partial class HeightMap : Node
     {
         return _image;
     }
+    
+    public Vector2I GetSize()
+    {
+        return _image.GetSize();
+    }
+    
+    public int GetHeightAtPixel(Vector2I pixelCoords, int maxHeight = 20)
+    {
+        Color pixel = _image.GetPixelv(pixelCoords);
+        return (int)Math.Round(pixel.Luminance * maxHeight);
+    }
 }

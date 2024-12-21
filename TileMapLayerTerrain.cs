@@ -83,6 +83,16 @@ public partial class TileMapLayerTerrain : TileMapLayer
     {
         var heightMap = new HeightMap("./heightmap_sm.png");
         var image = heightMap.GetImage();
+        
+        if (image.GetWidth() % 3 > 0) 
+        {
+            GD.Print("ERROR: Image width should be multiple of 3");
+        }
+        if (image.GetHeight() % 2 > 0)
+        {
+            GD.Print("ERROR: Image height should be multiple of 2");
+        }
+        
         var scaleFactor = 3; // Should be 3 to be 1-1 pixels to vertices
         var cellsWide = Math.Floor((decimal)(image.GetWidth() / scaleFactor));
         var cellsTall = Math.Floor((decimal)(image.GetHeight() / scaleFactor));
