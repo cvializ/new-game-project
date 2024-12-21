@@ -127,12 +127,4 @@ public partial class CoordinateUtils : Godot.Node
         
         return carry;
     }
-    
-    public override void _Ready()
-    {
-        GD.Print("Vector2IToVector4I (0, -1) to ", Vector2IToVector4I(new Vector2I(0, -1)));
-        GD.Print("Vector2IToVector4I (1, 0) to ", Vector2IToVector4I(new Vector2I(1, 0)));
-        GD.Print("Vector2IToVector4I (1, 1) to ", Vector2IToVector4I(new Vector2I(1, 1)));
-        GD.Print("Vector2IToVector4I (2, 1) to ", Vector2IToVector4I(new Vector2I(2, 1)));
-    }
 }
