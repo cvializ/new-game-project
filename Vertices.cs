@@ -150,13 +150,13 @@ public partial class Vertices : Node
     {
         int row = pixelCoords.Y;
         int column = pixelCoords.X;
-        Vector2I conversionX = row % 2 == 0 ? new Vector2I(0, 0) : new Vector2I(-1, 0);
         
-        Vector2I conversionY = column < 2 ? new Vector2I(0, 0) : new Vector2I(0, -1);
+        Vector2I oddRowDelta = new Vector2I(-1, 1);
+        Vector2I evenRowDelta = new Vector2I(0, 1);
         
-        //GD.Print("initial", pixelCoords, "conversion", conversionX + conversionY);
+        int pairs = row / 2;
         
-        return pixelCoords + conversionX + conversionY;
+        return pairs * (oddRowDelta + evenRowDelta) + (row % 2 == 0 ? new Vector2I(0, 0) : oddRowDelta);
     }
 
     //public Vector2 _VertexAxialCoordsToGlobalCoords(Vector2I pixelCoords)
