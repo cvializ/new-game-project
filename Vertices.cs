@@ -24,7 +24,7 @@ public partial class Vertex : Node2D
 
     public override void _Ready()
     {
-        _label = new MyLabel($"{_height}");
+        _label = new MyLabel($"");
         AddChild(_label);
     }
 
@@ -73,17 +73,6 @@ public partial class Vertices : Node
         return new Vector2((float)adjacent, (float)opposite);
     }
 
-    //private static Vector4I[] TileToVertexIndexConversion = new Vector4I[]
-    //{
-        //new Vector4I(0, 0, 0, 0), // NW
-        //new Vector4I(-1, 0, 1, 2), // W
-        //new Vector4I(0, 1, -1, 0), // SW
-        //new Vector4I(0, 0, 0, 2), // SE
-        //new Vector4I(1, 0, -1, 0), // E
-        //new Vector4I(0, -1, 1, 2), // NE
-        //new Vector4I(0, 0, 0, 1), // center, lame
-    //};
-
     public static Vector4I GetVertexFromCenter(Vector4I centerVertex, int index)
     {
         //var nwVertex = centerVertex - new Vector4I(0, 0, 0, 1);
@@ -116,15 +105,13 @@ public partial class Vertices : Node
                 break;
         }
         
-        return CoordinateUtils.TranslateVector(centerVertex, 1, direction);
+        return centerVertex + direction;
     }
 
     public static Vector4I TileToVertexCoord(Vector3I tile, int index)
     {
-        //var converter = Vertices.TileToVertexIndexConversion[index];
         var centerVertex = new Vector4I(tile.X, tile.Y, tile.Z, 1);
         return GetVertexFromCenter(centerVertex, index);
-        //return tile4 + converter;
     }
     
     public List<Vertex> GetCenterVertices()
@@ -132,7 +119,7 @@ public partial class Vertices : Node
         var centerVertices = new List<Vertex>();
         foreach (Vector4I key in this.vertexDict.Keys)
         {
-            if (vertexDict[key].GetCoords().W == 2)
+            if (vertexDict[key].GetCoords().W == 1)
             {
                 centerVertices.Add(vertexDict[key]);
             }
@@ -151,77 +138,39 @@ public partial class Vertices : Node
         int row = pixelCoords.Y;
         int column = pixelCoords.X;
         
-        Vector2I oddRowDelta = new Vector2I(-1, 1);
+        // Handle side sawtooth
         Vector2I evenRowDelta = new Vector2I(0, 1);
-        
+        Vector2I oddRowDelta = new Vector2I(-1, 1);
         int pairs = row / 2;
         
-        return pairs * (oddRowDelta + evenRowDelta) + (row % 2 == 0 ? new Vector2I(0, 0) : oddRowDelta);
+        // Handle top sawtooth
+        Vector2I thirdOfFourColumnsDelta = row % 2 == 0 ? new Vector2I(-1, 1) : new Vector2I(0, 1);
+        var adjustment = (column - 2) % 3 == 0 ? thirdOfFourColumnsDelta : new Vector2I(0, 0);
+        var next = pairs * (oddRowDelta + evenRowDelta) + (row % 2 == 0 ? new Vector2I(0, 0) : oddRowDelta);
+        
+        return next + new Vector2I(1, 0) * pixelCoords + adjustment;
     }
 
-    //public Vector2 _VertexAxialCoordsToGlobalCoords(Vector2I pixelCoords)
+    //public Vector2 _VertexAxialCoordsToTriangleCoords(Vector2I coords)
     //{
-        //Vector2 y0 = new Vector2(1, 0).Rotated((float)(2 * Math.PI / 3));//new Vector2I(-1, 1);
-        //Vector2 y1 = new Vector2(1, 0).Rotated((float)(Math.PI / 3));//new Vector2I(0, 1);
-        //Vector2[] yArray = {
-            //new Vector2(0, 0),
-            //y0,
-        //};
-        //int halfY = (int)Math.Floor((decimal)pixelCoords.Y);
-        //Vector2 yPathEven = (y0 + y1) * halfY;
-        //Vector2 conversionY = (y0 + y1) * halfY + yArray[pixelCoords.Y % 2];
+        //Vector2 E = new Vector2(1, 0);
+        //Vector2 SE = E.Rotated((float)(Math.PI / 3));
         //
-        //Vector2 x0 = new Vector2(1, 0);
-        //Vector2 x1 = new Vector2(1, 0).Rotated((float)(Math.PI / 3));
-        //Vector2 x2 = new Vector2(1, 0);
-        //Vector2 x3 = new Vector2(1, 0).Rotated((float)(-Math.PI / 3));
-        //Vector2[] xArray = {
-            //new Vector2(0, 0),
-            //x0,
-            //x0 + x1,
-            //x0 + x1 + x2,
-        //};
-        //
-        //int fourthX = (int)Math.Floor((decimal)(pixelCoords.X / 4));
-        //
-        //Vector2 conversionX = (x0 + x1 + x2 + x3) * fourthX + xArray[pixelCoords.X % 4];
-        //
-        //var message = "Directions: ";
-        //for (var i = 0; i < fourthX; i++)
-        //{
-            //message += "E, SE, E, NW";
-        //}
-        //if (pixelCoords.X % 4 == 1) message += "SE ";
-        //if (pixelCoords.X % 4 == 2) message += "E ";
-        //if (pixelCoords.X % 4 == 3) message += "NW ";
-        //GD.Print(message);
-        //
-        //GD.Print("initial", pixelCoords, "conversion", conversionX + conversionY);
-        //
-        //GD.Print("");
-        //return (pixelCoords + conversionX + conversionY) * 32;
+        //return (E * coords.X + SE * coords.Y);
     //}
 
-    public Vector2 _VertexAxialCoordsToTriangleCoords(Vector2I coords)
-    {
-        Vector2 E = new Vector2(1, 0);
-        Vector2 SE = E.Rotated((float)(Math.PI / 3));
-        
-        return (E * coords.X + SE * coords.Y);
-    }
-
     // Useful once 0,1 is -1, 1
-    public Vector2 _VertexAxialCoordsToGlobalCoords(Vector4I coords)
+    public Vector2 _VertexCubeCoordsToGlobalCoords(Vector4I vertexCubeCoords)
     {
         Vector2 E = new Vector2(1, 0);
         Vector2 SW = E.Rotated((float)(2 * Math.PI / 3));
         Vector2 NW = E.Rotated((float)(-2 * Math.PI / 3));
         Vector2 SE = E.Rotated((float)(Math.PI / 3));
         
-        int q = coords.X;
-        int r = coords.Y;
-        int s = coords.Z;
-        int w = coords.W;
+        int q = vertexCubeCoords.X;
+        int r = vertexCubeCoords.Y;
+        int s = vertexCubeCoords.Z;
+        int w = vertexCubeCoords.W;
         
         return (q * E + r * SW + s * NW + w * SE) * 32;
     }
@@ -236,7 +185,7 @@ public partial class Vertices : Node
             var coords = MathUtils.OddQToCube(mapCoords);
             var vertexCoords = Vertices.TileToVertexCoord(coords, index);
 
-            GD.Print(vertexCoords);
+            GD.Print("Cell: ", ((Cell)cell).GetCoords());
             var vertex = this.vertexDict[vertexCoords];
             vertex.SetHeight(vertex.GetHeight() + 1);
         };
@@ -257,76 +206,21 @@ public partial class Vertices : Node
         var max = 0;
         for (int i = 0; i < size.X; i++)
         {
-            GD.Print("START", i);
+            //if (max++ == 10) return;
             for (int j = 0; j < size.Y; j++)
             {
-                if (max++ == 6) return;
                 Vector2I pixelCoords = new Vector2I(i, j);
                 Vector2I vertexAxialCoords = _PixelToVertexAxialCoords(pixelCoords);
                 Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);              
                 
-                GD.Print($"pixelCoords {pixelCoords} vertexAxialCoords {vertexAxialCoords} vertexCubeCoords {vertexCubeCoords}");
-                
-                Vertex vertex = new Vertex(vertexCubeCoords, j);//heightMap.GetHeightAtPixel(pixelCoords));
-                
-                //Vector2 vertexGlobalCoords = _VertexAxialCoordsToTriangleCoords(pixelCoords); // this needs to be the adjusted grid coords
-                Vector2 vertexGlobalCoords = _VertexAxialCoordsToGlobalCoords(vertexCubeCoords);
-                //GD.Print("vertexGlobalCoords", vertexGlobalCoords);
+                Vertex vertex = new Vertex(vertexCubeCoords, heightMap.GetHeightAtPixel(pixelCoords));
+                Vector2 vertexGlobalCoords = _VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
                 vertex.SetGlobalPosition(origin + vertexGlobalCoords);
                 
                 this.vertexDict[vertexCubeCoords] = vertex;
                 this.AddChild(vertex);
             }
         }
-//
-        //var max = 0;//
-        //foreach (Node2D cell in cells)
-        //{
-            ////if (max++ > 6) break;
-            //var mapCoords = tilMapLayerTerrain.LocalToMap(cell.GetPosition());
-            //var coords = MathUtils.OddQToCube(mapCoords);
-            //
-            //var cellGlobalPos = cell.GetGlobalPosition();
-//
-            //for (var index = 0; index < 6; index++)
-            //{
-                //var vertexCoords = Vertices.TileToVertexCoord(coords, index);
-                //if (this.vertexDict.ContainsKey(vertexCoords))
-                //{
-                    //continue;
-                //}
- //
-                //var cube = new Vector3I(vertexCoords.X, vertexCoords.Y, vertexCoords.Z);
-                //var pixelVector = MathUtils.CubeToOddQ(cube); // this needs to consider center vertices?
-                ////GD.Print($"coords {coords} pixelVector {pixelVector}");
-                //Color pixel = heightMap.GetImage().GetPixelv(pixelVector);
-                //var height = (int)Math.Round(pixel.Luminance * _maxHeight);
-//
-                //var vertex = new Vertex(vertexCoords, height);
-                //var vertexCircleOffset = this.GetCirclePoint(index);
-                //var vertexGlobalPos = cellGlobalPos + vertexCircleOffset;
-                //vertex.SetGlobalPosition(vertexGlobalPos);
-                //
-                //this.AddChild(vertex);
-//
-                //this.vertexDict[vertexCoords] = vertex;
-            //}
-//
-            //var centerVertexCoords =
-                //Vertices.TileToVertexCoord(coords, 0) +
-                //new Vector4I(0, 0, 0, 1);
-            //
-            //var pixelVectorC = MathUtils.CubeToOddQ(coords);
-            //Color pixelC = heightMap.GetImage().GetPixelv(pixelVectorC);
-            //var heightC = (int)Math.Round(pixelC.Luminance * _maxHeight);
-//
-            //var centerVertex = new Vertex(centerVertexCoords, heightC);
-            //var centerVertexGlobalPos = cellGlobalPos;
-            //centerVertex.SetPosition(cell.GetPosition());
-//
-            //this.AddChild(centerVertex);
-            //this.vertexDict[centerVertexCoords] = centerVertex;
-        //}
     }
 
     public Godot.Collections.Dictionary<Vector4I, Vertex> GetVertexDict()

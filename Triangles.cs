@@ -34,6 +34,8 @@ public partial class Triangle : Node2D
             polygonPoints.Add(vertex.GetPosition());
         }
 
+        GD.Print("We polygonnin");
+
         _polygon.SetPolygon(polygonPoints.ToArray());
     
         _Update();
@@ -115,6 +117,7 @@ public partial class Triangles : Node
         foreach (Vertex centerVertex in centerVertices)
         {
             var centerCoords = centerVertex.GetCoords();
+            GD.Print("centerVertex ", centerCoords);
             
             for (int i = 0; i < 6; i++)
             {
@@ -124,9 +127,19 @@ public partial class Triangles : Node
                 var firstCoords = Vertices.GetVertexFromCenter(centerCoords, firstIndex);
                 var secondCoords = Vertices.GetVertexFromCenter(centerCoords, secondIndex);
 
-                var firstVertex = vertices.GetVertex(firstCoords);
-                var secondVertex = vertices.GetVertex(secondCoords);
-                
+                GD.Print(firstCoords, secondCoords);
+
+                Vertex firstVertex, secondVertex;
+                try
+                {
+                    firstVertex = vertices.GetVertex(firstCoords);
+                    secondVertex = vertices.GetVertex(secondCoords);
+                }
+                catch (Exception e)
+                {
+                    GD.Print("oops");
+                    continue;
+                }
                 var triangle = new Triangle(new Vertex[]
                 {
                     centerVertex,

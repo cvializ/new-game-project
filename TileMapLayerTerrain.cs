@@ -93,9 +93,9 @@ public partial class TileMapLayerTerrain : TileMapLayer
             GD.Print("ERROR: Image height should be multiple of 2");
         }
         
-        var scaleFactor = 3; // Should be 3 to be 1-1 pixels to vertices
-        var cellsWide = Math.Floor((decimal)(image.GetWidth() / scaleFactor));
-        var cellsTall = Math.Floor((decimal)(image.GetHeight() / scaleFactor));
+        var scaleFactor = 1.5; // Should be 3 to be 1-1 pixels to vertices
+        var cellsWide = Math.Floor((decimal)(image.GetWidth() / 1.5)) - 1;
+        var cellsTall = Math.Floor((decimal)(image.GetHeight() / 2));
         
         GD.Print($"Image is {image.GetWidth()}x{image.GetHeight()}");
         GD.Print($"Map is {cellsWide}x{cellsTall}");
