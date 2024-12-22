@@ -106,7 +106,7 @@ public partial class CoordinateUtils : Godot.Node
         int q = (int)(initial * Direction2E).X;
         int r = (int)(initial * Direction2SE).Y;
         
-        GD.Print($"(q, r) = ({q}, {r})");
+        //GD.Print($"(q, r) = ({q}, {r})");
         
         Vector4I initialVector = new Vector4I(0, 0, 0, 0);
         Vector4I vectorTranslatedE = TranslateVector(initialVector, q, Direction4E);

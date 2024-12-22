@@ -148,89 +148,84 @@ public partial class Vertices : Node
     
     public Vector2I _PixelToVertexAxialCoords(Vector2I pixelCoords)
     {
-        Vector2I conversionX = pixelCoords.X % 2 == 0 ? new Vector2I(0, 0) : new Vector2I(-1, 0);
+        int row = pixelCoords.Y;
+        int column = pixelCoords.X;
+        Vector2I conversionX = row % 2 == 0 ? new Vector2I(0, 0) : new Vector2I(-1, 0);
         
-        Vector2I conversionY = pixelCoords.X % 4 < 2 ? new Vector2I(0, 0) : new Vector2I(0, -1);
+        Vector2I conversionY = column < 2 ? new Vector2I(0, 0) : new Vector2I(0, -1);
         
-        GD.Print("initial", pixelCoords, "conversion", conversionX + conversionY);
+        //GD.Print("initial", pixelCoords, "conversion", conversionX + conversionY);
         
         return pixelCoords + conversionX + conversionY;
     }
 
-    public Vector2 _VertexAxialCoordsToGlobalCoords(Vector2I pixelCoords)
-    {
-        Vector2 y0 = new Vector2(1, 0).Rotated((float)(2 * Math.PI / 3));//new Vector2I(-1, 1);
-        Vector2 y1 = new Vector2(1, 0).Rotated((float)(Math.PI / 3));//new Vector2I(0, 1);
-        Vector2[] yArray = {
-            new Vector2(0, 0),
-            y0,
-        };
-        int halfY = (int)Math.Floor((decimal)pixelCoords.Y);
-        Vector2 yPathEven = (y0 + y1) * halfY;
-        Vector2 conversionY = (y0 + y1) * halfY + yArray[pixelCoords.Y % 2];
-        
-        Vector2 x0 = new Vector2(1, 0);
-        Vector2 x1 = new Vector2(1, 0).Rotated((float)(Math.PI / 3));
-        Vector2 x2 = new Vector2(1, 0);
-        Vector2 x3 = new Vector2(1, 0).Rotated((float)(-Math.PI / 3));
-        Vector2[] xArray = {
-            new Vector2(0, 0),
-            x0,
-            x0 + x1,
-            x0 + x1 + x2,
-        };
-        
-        int fourthX = (int)Math.Floor((decimal)(pixelCoords.X / 4));
-        
-        Vector2 conversionX = (x0 + x1 + x2 + x3) * fourthX + xArray[pixelCoords.X % 4];
-        
-        var message = "Directions: ";
-        for (var i = 0; i < fourthX; i++)
-        {
-            message += "E, SE, E, NW";
-        }
-        if (pixelCoords.X % 4 == 1) message += "SE ";
-        if (pixelCoords.X % 4 == 2) message += "E ";
-        if (pixelCoords.X % 4 == 3) message += "NW ";
-        GD.Print(message);
-        
-        GD.Print("initial", pixelCoords, "conversion", conversionX + conversionY);
-        
-        GD.Print("");
-        return (pixelCoords + conversionX + conversionY) * 32;
-    }
+    //public Vector2 _VertexAxialCoordsToGlobalCoords(Vector2I pixelCoords)
+    //{
+        //Vector2 y0 = new Vector2(1, 0).Rotated((float)(2 * Math.PI / 3));//new Vector2I(-1, 1);
+        //Vector2 y1 = new Vector2(1, 0).Rotated((float)(Math.PI / 3));//new Vector2I(0, 1);
+        //Vector2[] yArray = {
+            //new Vector2(0, 0),
+            //y0,
+        //};
+        //int halfY = (int)Math.Floor((decimal)pixelCoords.Y);
+        //Vector2 yPathEven = (y0 + y1) * halfY;
+        //Vector2 conversionY = (y0 + y1) * halfY + yArray[pixelCoords.Y % 2];
+        //
+        //Vector2 x0 = new Vector2(1, 0);
+        //Vector2 x1 = new Vector2(1, 0).Rotated((float)(Math.PI / 3));
+        //Vector2 x2 = new Vector2(1, 0);
+        //Vector2 x3 = new Vector2(1, 0).Rotated((float)(-Math.PI / 3));
+        //Vector2[] xArray = {
+            //new Vector2(0, 0),
+            //x0,
+            //x0 + x1,
+            //x0 + x1 + x2,
+        //};
+        //
+        //int fourthX = (int)Math.Floor((decimal)(pixelCoords.X / 4));
+        //
+        //Vector2 conversionX = (x0 + x1 + x2 + x3) * fourthX + xArray[pixelCoords.X % 4];
+        //
+        //var message = "Directions: ";
+        //for (var i = 0; i < fourthX; i++)
+        //{
+            //message += "E, SE, E, NW";
+        //}
+        //if (pixelCoords.X % 4 == 1) message += "SE ";
+        //if (pixelCoords.X % 4 == 2) message += "E ";
+        //if (pixelCoords.X % 4 == 3) message += "NW ";
+        //GD.Print(message);
+        //
+        //GD.Print("initial", pixelCoords, "conversion", conversionX + conversionY);
+        //
+        //GD.Print("");
+        //return (pixelCoords + conversionX + conversionY) * 32;
+    //}
 
-    public Vector2 _VertexAxialCoordsToSquareGlobalCoords(Vector2I coords)
+    public Vector2 _VertexAxialCoordsToTriangleCoords(Vector2I coords)
     {
         Vector2 E = new Vector2(1, 0);
         Vector2 SE = E.Rotated((float)(Math.PI / 3));
-        Vector2 SW = SE.Rotated((float)(Math.PI / 3));
-        Vector2 NE = E.Rotated((float)(-Math.PI / 3));
         
-        Vector2 evenRowAdjustment = SE + SW;
-        Vector2 oddRowAdjustment = SW;
-        
-        int pairs = coords.Y / 2;
-        
-        Vector2 rowAdjustment = evenRowAdjustment * pairs + (coords.Y % 2 == 1 ? oddRowAdjustment : new Vector2(0, 0));
-        //
-        //
-        ////Vector2 firstColumnMod4 = E;
-        ////Vector2 secondColumnMod4 = SE;
-        ////Vector2 thirdColumnMod4 = E;
-        ////Vector2 fourthColumnMod4 = NE;
-        //Vector2[] columnAdjustments = new Vector2[] {
-            //new Vector2(0, 0),
-            //E,
-            //new Vector2(0, 0),
-        //};
-                //
-        //int quads = coords.X / 4;
-        //
-        //Vector2 columnAdjustment = (E + SE + E + NE) * quads + columnAdjustments[coords.X % 4];
-        
-        return (coords + rowAdjustment * 32);// + columnAdjustment * 32);
+        return (E * coords.X + SE * coords.Y);
     }
+
+    // Useful once 0,1 is -1, 1
+    public Vector2 _VertexAxialCoordsToGlobalCoords(Vector4I coords)
+    {
+        Vector2 E = new Vector2(1, 0);
+        Vector2 SW = E.Rotated((float)(2 * Math.PI / 3));
+        Vector2 NW = E.Rotated((float)(-2 * Math.PI / 3));
+        Vector2 SE = E.Rotated((float)(Math.PI / 3));
+        
+        int q = coords.X;
+        int r = coords.Y;
+        int s = coords.Z;
+        int w = coords.W;
+        
+        return (q * E + r * SW + s * NW + w * SE) * 32;
+    }
+
 
     public override void _Ready()
     {
@@ -262,20 +257,21 @@ public partial class Vertices : Node
         var max = 0;
         for (int i = 0; i < size.X; i++)
         {
-            if (max++ == 3) return;
+            GD.Print("START", i);
             for (int j = 0; j < size.Y; j++)
             {
+                if (max++ == 6) return;
                 Vector2I pixelCoords = new Vector2I(i, j);
                 Vector2I vertexAxialCoords = _PixelToVertexAxialCoords(pixelCoords);
-                Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);
+                Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);              
                 
-                GD.Print($"vertexAxialCoords {vertexAxialCoords} vertexCubeCoords {vertexCubeCoords}");
+                GD.Print($"pixelCoords {pixelCoords} vertexAxialCoords {vertexAxialCoords} vertexCubeCoords {vertexCubeCoords}");
                 
                 Vertex vertex = new Vertex(vertexCubeCoords, j);//heightMap.GetHeightAtPixel(pixelCoords));
                 
-                Vector2 vertexGlobalCoords = _VertexAxialCoordsToSquareGlobalCoords(vertexAxialCoords);
-                //Vector2 vertexGlobalCoords = _VertexAxialCoordsToGlobalCoords(vertexAxialCoords);
-                GD.Print("vertexGlobalCoords", vertexGlobalCoords);
+                //Vector2 vertexGlobalCoords = _VertexAxialCoordsToTriangleCoords(pixelCoords); // this needs to be the adjusted grid coords
+                Vector2 vertexGlobalCoords = _VertexAxialCoordsToGlobalCoords(vertexCubeCoords);
+                //GD.Print("vertexGlobalCoords", vertexGlobalCoords);
                 vertex.SetGlobalPosition(origin + vertexGlobalCoords);
                 
                 this.vertexDict[vertexCubeCoords] = vertex;
