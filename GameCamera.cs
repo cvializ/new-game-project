@@ -57,8 +57,8 @@ public partial class GameCamera : Camera2D
         var deltaVector = new Vector2((float)zoom, (float)zoom);
         var nextZoom = Zoom + deltaVector;
         
-        if (nextZoom[0] == 0) {
-            Zoom = deltaVector;
+        if (nextZoom[0] <= 0) {
+            nextZoom = Zoom;
             return;
         }
         

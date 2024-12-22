@@ -200,6 +200,38 @@ public partial class Vertices : Node
         return (pixelCoords + conversionX + conversionY) * 32;
     }
 
+    public Vector2 _VertexAxialCoordsToSquareGlobalCoords(Vector2I coords)
+    {
+        Vector2 E = new Vector2(1, 0);
+        Vector2 SE = E.Rotated((float)(Math.PI / 3));
+        Vector2 SW = SE.Rotated((float)(Math.PI / 3));
+        Vector2 NE = E.Rotated((float)(-Math.PI / 3));
+        
+        Vector2 evenRowAdjustment = SE + SW;
+        Vector2 oddRowAdjustment = SW;
+        
+        int pairs = coords.Y / 2;
+        
+        Vector2 rowAdjustment = evenRowAdjustment * pairs + (coords.Y % 2 == 1 ? oddRowAdjustment : new Vector2(0, 0));
+        //
+        //
+        ////Vector2 firstColumnMod4 = E;
+        ////Vector2 secondColumnMod4 = SE;
+        ////Vector2 thirdColumnMod4 = E;
+        ////Vector2 fourthColumnMod4 = NE;
+        //Vector2[] columnAdjustments = new Vector2[] {
+            //new Vector2(0, 0),
+            //E,
+            //new Vector2(0, 0),
+        //};
+                //
+        //int quads = coords.X / 4;
+        //
+        //Vector2 columnAdjustment = (E + SE + E + NE) * quads + columnAdjustments[coords.X % 4];
+        
+        return (coords + rowAdjustment * 32);// + columnAdjustment * 32);
+    }
+
     public override void _Ready()
     {
         var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
@@ -230,9 +262,9 @@ public partial class Vertices : Node
         var max = 0;
         for (int i = 0; i < size.X; i++)
         {
+            if (max++ == 3) return;
             for (int j = 0; j < size.Y; j++)
             {
-                if (max++ == 5) return;
                 Vector2I pixelCoords = new Vector2I(i, j);
                 Vector2I vertexAxialCoords = _PixelToVertexAxialCoords(pixelCoords);
                 Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);
@@ -241,9 +273,10 @@ public partial class Vertices : Node
                 
                 Vertex vertex = new Vertex(vertexCubeCoords, j);//heightMap.GetHeightAtPixel(pixelCoords));
                 
+                Vector2 vertexGlobalCoords = _VertexAxialCoordsToSquareGlobalCoords(vertexAxialCoords);
                 //Vector2 vertexGlobalCoords = _VertexAxialCoordsToGlobalCoords(vertexAxialCoords);
-                //GD.Print("vertexGlobalCoords", vertexGlobalCoords);
-                //vertex.SetGlobalPosition(origin + vertexGlobalCoords);
+                GD.Print("vertexGlobalCoords", vertexGlobalCoords);
+                vertex.SetGlobalPosition(origin + vertexGlobalCoords);
                 
                 this.vertexDict[vertexCubeCoords] = vertex;
                 this.AddChild(vertex);

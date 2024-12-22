@@ -48,7 +48,7 @@ script = ExtResource("6_0o22g")
 [node name="Cells" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_kpry7")
 
-[node name="Vertices" type="Node" parent="TerrainSystem"]
+[node name="Vertices" type="Node2D" parent="TerrainSystem"]
 script = ExtResource("6_xgmhd")
 
 [node name="Triangles" type="Node" parent="TerrainSystem"]
