@@ -3,19 +3,30 @@ using System.Collections.Generic;
 using Godot;
 using System.Linq;
 
-public partial class Triangle : Node2D
+//
+// Face data
+// 
+// soil type? tile layer
+// normal, slope
+// edges
+// rate of flow
+// rate of evaporation
+// rate of infiltration
+// rate of 
+
+public partial class Face : Node2D
 {
-    private Vector3 SunVector = new Vector3(0, -1, (float)Math.Sin(Math.PI / 3));
+    private Vector3 _sunVector = new Vector3(0, -1, (float)Math.Sin(Math.PI / 3));
     
     private Vertex[] _vertices;
     private Polygon2D _polygon = new Polygon2D();
     
-    public Triangle()
+    public Face()
         : this(new[] { new Vertex(), new Vertex(), new Vertex() })
     {
     }
 
-    public Triangle(Vertex[] vertices)
+    public Face(Vertex[] vertices)
     {
         _vertices = vertices;
     }
@@ -34,8 +45,6 @@ public partial class Triangle : Node2D
             polygonPoints.Add(vertex.GetPosition());
         }
 
-        GD.Print("We polygonnin");
-
         _polygon.SetPolygon(polygonPoints.ToArray());
     
         _Update();
@@ -43,31 +52,50 @@ public partial class Triangle : Node2D
         this.AddChild(_polygon);
     }
 
-    private void _Update()
-    {   
+    private Vector3 _GetNormal()
+    {
         var A = new Vector3(_polygon.Polygon[0].X, _polygon.Polygon[0].Y, _vertices[0].GetHeight());
         var B = new Vector3(_polygon.Polygon[1].X, _polygon.Polygon[1].Y, _vertices[1].GetHeight());
         var C = new Vector3(_polygon.Polygon[2].X, _polygon.Polygon[2].Y, _vertices[2].GetHeight());
         var BA = B - A;
         var BC = B - C;
-        var trianglePlaneNormalVector = BA.Cross(BC).Normalized();
+        var faceNormalVector = BA.Cross(BC).Normalized();
         
-        var bounceVector = SunVector.Bounce(trianglePlaneNormalVector).Normalized();
+        return faceNormalVector;
+    }
+
+    private void _Update()
+    {   
+        var faceNormalVector = _GetNormal();
+        var bounceVector = _sunVector.Bounce(faceNormalVector).Normalized();
         var cameraVector = new Vector3(0, 0, -1);
     
         var brightness = bounceVector.Dot(cameraVector);
         
         _polygon.SetColor(new Color(0, 0, 0, 1 - brightness));
-        
     }
 
-    public Vector3 GetNormal()
+    public double GetSlope()
     {
-        return new Vector3(0, 0, 0);
+        var referenceNormalVector = new Vector3(0, 0, 1);
+        var normalVector = _GetNormal();
+        double angle = referenceNormalVector.AngleTo(normalVector);
+        double slope = Math.Tan(angle);
+        
+        return slope;
+    }
+
+    public Vector2 GetDownhillDirection()
+    {
+        var normalVector = _GetNormal();
+        // what clock direction is the downward angle?
+        // I guess it's the normal's  X,Y values
+        Vector2 direction = new Vector2(normalVector.X, normalVector.Y);
+        return direction;
     }
 }
 
-public partial class Triangles : Node
+public partial class Faces : Node
 {
     private int _globalCount = 0;
     
@@ -109,7 +137,7 @@ public partial class Triangles : Node
     public override void _Ready()
     {
         var vertices = this.GetNode<Vertices>("/root/Root2D/TerrainSystem/Vertices");
-        var triangles = new Node2D();
+        var faces = new Node2D();
 
         var vertexDict = vertices.GetVertexDict();
         var centerVertices = vertices.GetCenterVertices();
@@ -117,7 +145,6 @@ public partial class Triangles : Node
         foreach (Vertex centerVertex in centerVertices)
         {
             var centerCoords = centerVertex.GetCoords();
-            GD.Print("centerVertex ", centerCoords);
             
             for (int i = 0; i < 6; i++)
             {
@@ -127,33 +154,25 @@ public partial class Triangles : Node
                 var firstCoords = Vertices.GetVertexFromCenter(centerCoords, firstIndex);
                 var secondCoords = Vertices.GetVertexFromCenter(centerCoords, secondIndex);
 
-                GD.Print(firstCoords, secondCoords);
-
                 Vertex firstVertex, secondVertex;
                 try
                 {
                     firstVertex = vertices.GetVertex(firstCoords);
                     secondVertex = vertices.GetVertex(secondCoords);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    GD.Print("oops");
                     continue;
                 }
-                var triangle = new Triangle(new Vertex[]
+                var face = new Face(new Vertex[]
                 {
                     centerVertex,
                     firstVertex,
                     secondVertex,
                 });
 
-                this.AddChild(triangle);
+                this.AddChild(face);
             }
         }
-    }
-
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
-    {
     }
 }

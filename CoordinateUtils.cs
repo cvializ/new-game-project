@@ -100,6 +100,39 @@ public partial class CoordinateUtils : Godot.Node
     {
         return initial + delta * direction;
     }
+
+    public static Vector2 VertexCubeCoordsToGlobalCoords(Vector4I vertexCubeCoords)
+    {
+        Vector2 E = new Vector2(1, 0);
+        Vector2 SW = E.Rotated((float)(2 * Math.PI / 3));
+        Vector2 NW = E.Rotated((float)(-2 * Math.PI / 3));
+        Vector2 SE = E.Rotated((float)(Math.PI / 3));
+        
+        int q = vertexCubeCoords.X;
+        int r = vertexCubeCoords.Y;
+        int s = vertexCubeCoords.Z;
+        int w = vertexCubeCoords.W;
+        
+        return (q * E + r * SW + s * NW + w * SE) * 32;
+    }
+    
+    public static Vector2I PixelToVertexAxialCoords(Vector2I pixelCoords)
+    {
+        int row = pixelCoords.Y;
+        int column = pixelCoords.X;
+        
+        // Handle side sawtooth
+        Vector2I evenRowDelta = new Vector2I(0, 1);
+        Vector2I oddRowDelta = new Vector2I(-1, 1);
+        int pairs = row / 2;
+        
+        // Handle top sawtooth
+        Vector2I thirdOfFourColumnsDelta = row % 2 == 0 ? new Vector2I(-1, 1) : new Vector2I(0, 1);
+        var adjustment = (column - 2) % 3 == 0 ? thirdOfFourColumnsDelta : new Vector2I(0, 0);
+        var next = pairs * (oddRowDelta + evenRowDelta) + (row % 2 == 0 ? new Vector2I(0, 0) : oddRowDelta);
+        
+        return next + new Vector2I(1, 0) * pixelCoords + adjustment;
+    }
     
     public static Vector4I Vector2IToVector4I(Vector2I initial)
     {

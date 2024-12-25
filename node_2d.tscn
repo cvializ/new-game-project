@@ -1,13 +1,14 @@
-[gd_scene load_steps=11 format=3 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=12 format=3 uid="uid://coeyoxva7s7xo"]
 
 [ext_resource type="Texture2D" uid="uid://dqrgcabe77r76" path="res://tiles/tileset.png" id="5_66dj5"]
-[ext_resource type="Script" path="res://Triangles.cs" id="5_uidih"]
+[ext_resource type="Script" path="res://Faces.cs" id="5_uidih"]
 [ext_resource type="Script" path="res://TileMapLayerTerrain.cs" id="6_0o22g"]
 [ext_resource type="Script" path="res://HeightMap.cs" id="6_knsir"]
 [ext_resource type="Script" path="res://Cells.cs" id="6_kpry7"]
 [ext_resource type="Script" path="res://Vertices.cs" id="6_xgmhd"]
 [ext_resource type="Script" path="res://GameCamera.cs" id="8_7n2eq"]
 [ext_resource type="Script" path="res://CoordinateUtils.cs" id="8_ea0o5"]
+[ext_resource type="Script" path="res://FpsLabel.cs" id="9_emmor"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gkok"]
 texture = ExtResource("5_66dj5")
@@ -51,7 +52,7 @@ script = ExtResource("6_kpry7")
 [node name="Vertices" type="Node2D" parent="TerrainSystem"]
 script = ExtResource("6_xgmhd")
 
-[node name="Triangles" type="Node" parent="TerrainSystem"]
+[node name="Faces" type="Node" parent="TerrainSystem"]
 script = ExtResource("5_uidih")
 
 [node name="Control" type="Node" parent="TerrainSystem"]
@@ -60,10 +61,16 @@ script = ExtResource("5_uidih")
 script = ExtResource("6_knsir")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(247, 136)
+position = Vector2(640, 392)
 position_smoothing_enabled = true
 script = ExtResource("8_7n2eq")
 _speed = 1200.0
+
+[node name="FPSLabel" type="Label" parent="Camera2D"]
+z_index = 1
+offset_right = 1.0
+offset_bottom = 23.0
+script = ExtResource("9_emmor")
 
 [node name="MenuSystem" type="Node" parent="."]
 

@@ -2,6 +2,17 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
+//
+// Vertex data
+//
+// height
+// edges
+// faces
+// rate of flow
+// rate of evaporation
+// rate of infiltration
+// rate of 
+
 public partial class Vertex : Node2D
 {
     [Signal]
@@ -24,7 +35,7 @@ public partial class Vertex : Node2D
 
     public override void _Ready()
     {
-        _label = new MyLabel($"");
+        _label = new MyLabel("");//$"{_height}");
         AddChild(_label);
     }
 
@@ -132,49 +143,6 @@ public partial class Vertices : Node
     {
         return vertexDict[coords];
     }
-    
-    public Vector2I _PixelToVertexAxialCoords(Vector2I pixelCoords)
-    {
-        int row = pixelCoords.Y;
-        int column = pixelCoords.X;
-        
-        // Handle side sawtooth
-        Vector2I evenRowDelta = new Vector2I(0, 1);
-        Vector2I oddRowDelta = new Vector2I(-1, 1);
-        int pairs = row / 2;
-        
-        // Handle top sawtooth
-        Vector2I thirdOfFourColumnsDelta = row % 2 == 0 ? new Vector2I(-1, 1) : new Vector2I(0, 1);
-        var adjustment = (column - 2) % 3 == 0 ? thirdOfFourColumnsDelta : new Vector2I(0, 0);
-        var next = pairs * (oddRowDelta + evenRowDelta) + (row % 2 == 0 ? new Vector2I(0, 0) : oddRowDelta);
-        
-        return next + new Vector2I(1, 0) * pixelCoords + adjustment;
-    }
-
-    //public Vector2 _VertexAxialCoordsToTriangleCoords(Vector2I coords)
-    //{
-        //Vector2 E = new Vector2(1, 0);
-        //Vector2 SE = E.Rotated((float)(Math.PI / 3));
-        //
-        //return (E * coords.X + SE * coords.Y);
-    //}
-
-    // Useful once 0,1 is -1, 1
-    public Vector2 _VertexCubeCoordsToGlobalCoords(Vector4I vertexCubeCoords)
-    {
-        Vector2 E = new Vector2(1, 0);
-        Vector2 SW = E.Rotated((float)(2 * Math.PI / 3));
-        Vector2 NW = E.Rotated((float)(-2 * Math.PI / 3));
-        Vector2 SE = E.Rotated((float)(Math.PI / 3));
-        
-        int q = vertexCubeCoords.X;
-        int r = vertexCubeCoords.Y;
-        int s = vertexCubeCoords.Z;
-        int w = vertexCubeCoords.W;
-        
-        return (q * E + r * SW + s * NW + w * SE) * 32;
-    }
-
 
     public override void _Ready()
     {
@@ -203,18 +171,18 @@ public partial class Vertices : Node
 
         Vector2 origin = qPositionVector / 2;
         
-        var max = 0;
+        //var max = 0;
         for (int i = 0; i < size.X; i++)
         {
             //if (max++ == 10) return;
             for (int j = 0; j < size.Y; j++)
             {
                 Vector2I pixelCoords = new Vector2I(i, j);
-                Vector2I vertexAxialCoords = _PixelToVertexAxialCoords(pixelCoords);
+                Vector2I vertexAxialCoords = CoordinateUtils.PixelToVertexAxialCoords(pixelCoords);
                 Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);              
                 
                 Vertex vertex = new Vertex(vertexCubeCoords, heightMap.GetHeightAtPixel(pixelCoords));
-                Vector2 vertexGlobalCoords = _VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
+                Vector2 vertexGlobalCoords = CoordinateUtils.VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
                 vertex.SetGlobalPosition(origin + vertexGlobalCoords);
                 
                 this.vertexDict[vertexCubeCoords] = vertex;

@@ -5,7 +5,6 @@ public partial class GameCamera : Camera2D
 {
     [Export]
     private double _speed;
-
     
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -57,8 +56,12 @@ public partial class GameCamera : Camera2D
         var deltaVector = new Vector2((float)zoom, (float)zoom);
         var nextZoom = Zoom + deltaVector;
         
-        if (nextZoom[0] <= 0) {
-            nextZoom = Zoom;
+        if (nextZoom[0] <= 0.5) {
+            return;
+        }
+        
+        if (nextZoom[0] >= 2)
+        {
             return;
         }
         
