@@ -99,15 +99,16 @@ public partial class TileMapLayerTerrain : TileMapLayer
         GD.Print($"Image is {image.GetWidth()}x{image.GetHeight()}");
         GD.Print($"Map is {cellsWide}x{cellsTall}");
         
-        var defaultTile = new Vector2I(0, 0);
+        var dirtTile = new Vector2I(0, 0);
+        var grassTile = new Vector2I(1, 0);
         GD.Print($"SetCell {this.GetTileMapDataAsArray()}");
-        SetCell(new Vector2I(0, 0), 4, defaultTile);
+        SetCell(new Vector2I(0, 0), 4, dirtTile);
         
         for (int i = 0; i < cellsWide; i++)
         {
             for (int j = 0; j < cellsTall; j++)
             {
-                this.SetCell(new Vector2I(i, j), 4, defaultTile);
+                SetCell(new Vector2I(i, j), 4, grassTile);
             }
         }
     }

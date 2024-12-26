@@ -62,6 +62,11 @@ public partial class Vertex : Node2D
     {
         return _coords;
     }
+    
+    public void Print()
+    {
+        GD.Print(GetCoords(), GetHeight());
+    }
 }
 
 public partial class Vertices : Node

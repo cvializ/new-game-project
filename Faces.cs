@@ -91,7 +91,20 @@ public partial class Face : Node2D
         // what clock direction is the downward angle?
         // I guess it's the normal's  X,Y values
         Vector2 direction = new Vector2(normalVector.X, normalVector.Y);
-        return direction;
+        return direction.Normalized();
+    }
+    
+    public void Print()
+    {
+        GD.Print("Face Start");
+        GD.Print("Vertices");
+        _vertices[0].Print();
+        _vertices[1].Print();
+        _vertices[2].Print();
+        GD.Print("Normal", _GetNormal());
+        GD.Print("Downhill", GetDownhillDirection());
+        GD.Print("Slope", GetSlope());
+        GD.Print("Face End");
     }
 }
 
@@ -142,6 +155,7 @@ public partial class Faces : Node
         var vertexDict = vertices.GetVertexDict();
         var centerVertices = vertices.GetCenterVertices();
 
+        int max = 0;
         foreach (Vertex centerVertex in centerVertices)
         {
             var centerCoords = centerVertex.GetCoords();
@@ -172,6 +186,11 @@ public partial class Faces : Node
                 });
 
                 this.AddChild(face);
+                
+                if (max++ < 10)
+                {
+                    face.Print();
+                }
             }
         }
     }

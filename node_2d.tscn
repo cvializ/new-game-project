@@ -1,6 +1,6 @@
-[gd_scene load_steps=12 format=3 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=14 format=3 uid="uid://coeyoxva7s7xo"]
 
-[ext_resource type="Texture2D" uid="uid://dqrgcabe77r76" path="res://tiles/tileset.png" id="5_66dj5"]
+[ext_resource type="Texture2D" uid="uid://dc51rdkmejjp" path="res://tiles/tileset.png" id="5_66dj5"]
 [ext_resource type="Script" path="res://Faces.cs" id="5_uidih"]
 [ext_resource type="Script" path="res://TileMapLayerTerrain.cs" id="6_0o22g"]
 [ext_resource type="Script" path="res://HeightMap.cs" id="6_knsir"]
@@ -10,33 +10,27 @@
 [ext_resource type="Script" path="res://CoordinateUtils.cs" id="8_ea0o5"]
 [ext_resource type="Script" path="res://FpsLabel.cs" id="9_emmor"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gkok"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6aob3"]
 texture = ExtResource("5_66dj5")
 texture_region_size = Vector2i(64, 55)
 0:0/0 = 0
 1:0/0 = 0
-2:0/0 = 0
-3:0/0 = 0
-4:0/0 = 0
-5:0/0 = 0
-6:0/0 = 0
-7:0/0 = 0
-0:1/0 = 0
-1:1/0 = 0
-2:1/0 = 0
-3:1/0 = 0
-4:1/0 = 0
-5:1/0 = 0
-6:1/0 = 0
-7:1/0 = 0
-0:2/0 = 0
-1:2/0 = 0
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_jh54u"]
+load_path = "res://.godot/imported/tileset.png-da3b9dcfd7e8b953ae1354b1e412254d.ctex"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3gkok"]
+texture = SubResource("CompressedTexture2D_jh54u")
+texture_region_size = Vector2i(64, 55)
+0:0/0 = 0
+1:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_rjn3j"]
 tile_shape = 3
 tile_offset_axis = 1
 tile_size = Vector2i(64, 55)
 sources/4 = SubResource("TileSetAtlasSource_3gkok")
+sources/0 = SubResource("TileSetAtlasSource_6aob3")
 
 [node name="Root2D" type="Node2D"]
 
@@ -49,7 +43,7 @@ script = ExtResource("6_0o22g")
 [node name="Cells" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_kpry7")
 
-[node name="Vertices" type="Node2D" parent="TerrainSystem"]
+[node name="Vertices" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_xgmhd")
 
 [node name="Faces" type="Node" parent="TerrainSystem"]
