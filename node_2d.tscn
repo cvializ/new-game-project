@@ -1,10 +1,11 @@
-[gd_scene load_steps=14 format=3 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=15 format=3 uid="uid://coeyoxva7s7xo"]
 
 [ext_resource type="Texture2D" uid="uid://dc51rdkmejjp" path="res://tiles/tileset.png" id="5_66dj5"]
 [ext_resource type="Script" path="res://Faces.cs" id="5_uidih"]
 [ext_resource type="Script" path="res://TileMapLayerTerrain.cs" id="6_0o22g"]
 [ext_resource type="Script" path="res://HeightMap.cs" id="6_knsir"]
 [ext_resource type="Script" path="res://Cells.cs" id="6_kpry7"]
+[ext_resource type="Script" path="res://Control.cs" id="6_lfvxi"]
 [ext_resource type="Script" path="res://Vertices.cs" id="6_xgmhd"]
 [ext_resource type="Script" path="res://GameCamera.cs" id="8_7n2eq"]
 [ext_resource type="Script" path="res://CoordinateUtils.cs" id="8_ea0o5"]
@@ -50,6 +51,7 @@ script = ExtResource("6_xgmhd")
 script = ExtResource("5_uidih")
 
 [node name="Control" type="Node" parent="TerrainSystem"]
+script = ExtResource("6_lfvxi")
 
 [node name="HeightMap" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_knsir")

@@ -42,7 +42,8 @@ public partial class Face : Node2D
             {
                 this._Update();
             };
-            polygonPoints.Add(vertex.GetPosition());
+            Vector2 position = vertex.GetPosition();
+            polygonPoints.Add(position);
         }
 
         _polygon.SetPolygon(polygonPoints.ToArray());

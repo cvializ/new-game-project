@@ -5,7 +5,7 @@ using Godot;
 public partial class TileMapLayerTerrain : TileMapLayer
 {
     [Signal]
-    public delegate void CellClickEventHandler(Node2D cell, int vertex);
+    public delegate void CellClickEventHandler(Cell cell, int vertex);
 
     private Vector2 GetCirclePoint(int segmentIndex)
     {
@@ -38,7 +38,7 @@ public partial class TileMapLayerTerrain : TileMapLayer
         EmitSignal(SignalName.CellClick, cell, vertex);
     }
 
-    public override void _Input(InputEvent @event)
+    public override void _UnhandledInput(InputEvent @event)
     {
         if (!(@event is InputEventMouseButton mouseEvent))
         {
@@ -49,7 +49,7 @@ public partial class TileMapLayerTerrain : TileMapLayer
         {
             return;
         }
-
+        
         var globalCoords = GetGlobalMousePosition();
         var localCoords = this.ToLocal(globalCoords);
         var mapCoords = this.LocalToMap(localCoords);
@@ -102,7 +102,6 @@ public partial class TileMapLayerTerrain : TileMapLayer
         var dirtTile = new Vector2I(0, 0);
         var grassTile = new Vector2I(1, 0);
         GD.Print($"SetCell {this.GetTileMapDataAsArray()}");
-        SetCell(new Vector2I(0, 0), 4, dirtTile);
         
         for (int i = 0; i < cellsWide; i++)
         {
@@ -111,5 +110,15 @@ public partial class TileMapLayerTerrain : TileMapLayer
                 SetCell(new Vector2I(i, j), 4, grassTile);
             }
         }
+        
+        CellClick += (cell, index) =>
+        {
+            if (Control.Instance.GetSelectedControl() != 0)
+            {
+                return;
+            }
+
+            SetCell(MathUtils.CubeToOddQ(cell.GetCoords()), 0, TileControl.Instance.GetSelectedTile());
+        };
     }
 }

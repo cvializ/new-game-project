@@ -154,6 +154,11 @@ public partial class Vertices : Node
         var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
         tileMapLayerTerrain.CellClick += (cell, index) =>
         {
+            if (Control.Instance.GetSelectedControl() != 1)
+            {
+                return;
+            }
+
             var mapCoords = tileMapLayerTerrain.LocalToMap(cell.GetPosition());
             var coords = MathUtils.OddQToCube(mapCoords);
             var vertexCoords = Vertices.TileToVertexCoord(coords, index);
@@ -188,7 +193,13 @@ public partial class Vertices : Node
                 
                 Vertex vertex = new Vertex(vertexCubeCoords, heightMap.GetHeightAtPixel(pixelCoords));
                 Vector2 vertexGlobalCoords = CoordinateUtils.VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
-                vertex.SetGlobalPosition(origin + vertexGlobalCoords);
+                var globalPos = origin + vertexGlobalCoords;
+                vertex.SetGlobalPosition(globalPos.Round());
+                
+                if (i == 0)
+                {
+                    GD.Print("pos ", globalPos.Round());
+                }
                 
                 this.vertexDict[vertexCubeCoords] = vertex;
                 this.AddChild(vertex);

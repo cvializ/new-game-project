@@ -113,7 +113,9 @@ public partial class CoordinateUtils : Godot.Node
         int s = vertexCubeCoords.Z;
         int w = vertexCubeCoords.W;
         
-        return (q * E + r * SW + s * NW + w * SE) * 32;
+        Vector2 result = (q * E + r * SW + s * NW + w * SE) * 32;
+
+        return result;
     }
     
     public static Vector2I PixelToVertexAxialCoords(Vector2I pixelCoords)
