@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Godot;
 
@@ -17,6 +18,9 @@ public partial class Vertex : Node2D
 {
     [Signal]
     public delegate void VertexClickEventHandler(Vertex vertex, int height);
+    
+    [Signal]
+    public delegate void OnHeightChangeEventHandler(Vertex vertex, int height);
 
     private int _height;
     private Node2D _label;
@@ -31,18 +35,22 @@ public partial class Vertex : Node2D
     {
         _coords = coords;
         _height = height;
+        
+        ViewControl.Instance.OnChangeShowVertices += (showVertices) => {
+            _label.SetVisible(showVertices);
+        };
     }
 
     public override void _Ready()
     {
-        _label = new MyLabel("0");//$"{_height}");
+        _label = new MyLabel($"{_height}");
         AddChild(_label);
     }
 
     private void UpdateLabel()
     {
         RemoveChild(_label);
-        _label = new MyLabel($"{_coords}");
+        _label = new MyLabel($"{_height}");
         AddChild(_label);
     }
 
@@ -54,7 +62,7 @@ public partial class Vertex : Node2D
     public void SetHeight(int height)
     {
         _height = height;
-        EmitSignal(SignalName.VertexClick, this, height);
+        EmitSignal(SignalName.OnHeightChange, this, height);
         UpdateLabel();
     }
 
@@ -87,6 +95,25 @@ public partial class Vertices : Node
         var adjacent = radius * Math.Cos(-angle);
         var opposite = radius * Math.Sin(-angle);
         return new Vector2((float)adjacent, (float)opposite);
+    }
+    
+    public Vertex[] GetSiblings(Vertex vertex)
+    {
+        Vector4I vertexCoords = vertex.GetCoords();
+        
+        return new Vertex[] {
+            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4NW)],
+            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4W)],
+            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4SW)],
+            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4SE)],
+            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4E)],
+            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4NE)],
+        };
+    }
+    
+    public Vertex[] GetDownhillSiblings(Vertex vertex)
+    {
+        return GetSiblings(vertex).Where(sibling => sibling.GetHeight() > vertex.GetHeight()).ToArray();
     }
 
     public static Vector4I GetVertexFromCenter(Vector4I centerVertex, int index)

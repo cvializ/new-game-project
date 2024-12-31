@@ -36,6 +36,9 @@ sources/0 = SubResource("TileSetAtlasSource_6aob3")
 
 [node name="Root2D" type="Node2D"]
 
+[node name="Control" type="Node" parent="."]
+script = ExtResource("6_lfvxi")
+
 [node name="TerrainSystem" type="Node" parent="."]
 
 [node name="TileMapLayerTerrain" type="TileMapLayer" parent="TerrainSystem"]
@@ -52,14 +55,13 @@ script = ExtResource("6_xgmhd")
 [node name="Faces" type="Node" parent="TerrainSystem"]
 script = ExtResource("5_uidih")
 
-[node name="Control" type="Node" parent="TerrainSystem"]
-script = ExtResource("6_lfvxi")
-
 [node name="HeightMap" type="Node" parent="TerrainSystem"]
 script = ExtResource("6_knsir")
 
 [node name="Edges" type="Node" parent="TerrainSystem"]
 script = ExtResource("8_12tvm")
+
+[node name="Water" type="Node" parent="."]
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 392)

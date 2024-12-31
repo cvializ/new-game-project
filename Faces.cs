@@ -33,12 +33,11 @@ public partial class Face : Node2D
 
     public override void _Ready()
     {
-        var firstVertexGlobalPosition = _vertices[0].GetGlobalPosition();
         List<Vector2> polygonPoints = new List<Vector2>();
         
         foreach (Vertex vertex in _vertices)
         {
-            vertex.VertexClick += (vertex, height) =>
+            vertex.OnHeightChange += (vertex, height) =>
             {
                 this._Update();
             };

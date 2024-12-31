@@ -2,6 +2,41 @@ using Godot;
 using System;
 
 
+public partial class ViewControl : Node
+{
+    [Signal]
+    public delegate void OnChangeShowVerticesEventHandler(bool showVertices);
+    
+    public static ViewControl Instance;
+    public ViewControl()
+    {
+        Instance = this;
+    }
+    
+    private bool _showVertices = false;
+    
+    // Called when the node enters the scene tree for the first time.
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event.IsAction("view_1"))
+        {
+            _showVertices = false;
+        }
+        
+        if (@event.IsAction("view_4"))
+        {
+            _showVertices = true;
+        }
+        
+        EmitSignal(SignalName.OnChangeShowVertices, _showVertices);
+    }
+    
+    public bool GetShowVertices()
+    {
+        return _showVertices;
+    }
+}
+
 public partial class TileControl : Node
 {
     public static TileControl Instance;
@@ -58,6 +93,12 @@ public partial class Control : Node
             _selectedControl = 1;
             return;
         }
+        
+        if (@event.IsAction("view_1"))
+        {
+            _selectedControl = 2;
+            return;
+        }
     }
     
     public int GetSelectedControl()
@@ -69,5 +110,6 @@ public partial class Control : Node
     public override void _Ready()
     {
         AddChild(new TileControl());
+        AddChild(new ViewControl());
     }
 }
