@@ -35,14 +35,14 @@ public partial class Vertex : Node2D
 
     public override void _Ready()
     {
-        _label = new MyLabel("");//$"{_height}");
+        _label = new MyLabel("0");//$"{_height}");
         AddChild(_label);
     }
 
     private void UpdateLabel()
     {
         RemoveChild(_label);
-        _label = new MyLabel($"{_height}");
+        _label = new MyLabel($"{_coords}");
         AddChild(_label);
     }
 
@@ -148,6 +148,17 @@ public partial class Vertices : Node
     {
         return vertexDict[coords];
     }
+    
+    public Vector2 VertexCubeCoordsToGlobalCoords(Vector4I cubeCoords)
+    {
+        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+        var angle = new Vector2(1, 0).Rotated((float)(Math.PI / 3)) * 32;
+        
+        Vector2I oddQ = MathUtils.CubeToOddQ(new Vector3I(cubeCoords.X, cubeCoords.Y, cubeCoords.Z));
+        Vector2 localPosition = tileMapLayerTerrain.MapToLocal(oddQ) + angle * cubeCoords.W - angle;
+        
+        return tileMapLayerTerrain.ToGlobal(localPosition);
+    }
 
     public override void _Ready()
     {
@@ -170,36 +181,23 @@ public partial class Vertices : Node
 
         var tilMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
 
-        var cellsNode = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
-        var cells = cellsNode.GetCells();
         var heightMap = new HeightMap("./heightmap_sm.png");
 
-        var size = heightMap.GetSize();
+        Vector2I size = heightMap.GetSize();
         
-        Vector2 qPositionVector = new Vector2(1, 0) * 32;
-        Vector2 rPositionVector = new Vector2(1, 0).Rotated((float)(Math.PI / 3)) * 32;
-
-        Vector2 origin = qPositionVector / 2;
-        
-        //var max = 0;
+        var max = 0;
         for (int i = 0; i < size.X; i++)
         {
-            //if (max++ == 10) return;
             for (int j = 0; j < size.Y; j++)
             {
+                //if (max++ == 10) return;
                 Vector2I pixelCoords = new Vector2I(i, j);
                 Vector2I vertexAxialCoords = CoordinateUtils.PixelToVertexAxialCoords(pixelCoords);
                 Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);              
                 
                 Vertex vertex = new Vertex(vertexCubeCoords, heightMap.GetHeightAtPixel(pixelCoords));
-                Vector2 vertexGlobalCoords = CoordinateUtils.VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
-                var globalPos = origin + vertexGlobalCoords;
-                vertex.SetGlobalPosition(globalPos.Round());
-                
-                if (i == 0)
-                {
-                    GD.Print("pos ", globalPos.Round());
-                }
+                Vector2 vertexGlobalCoords = VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
+                vertex.SetGlobalPosition(vertexGlobalCoords);
                 
                 this.vertexDict[vertexCubeCoords] = vertex;
                 this.AddChild(vertex);
