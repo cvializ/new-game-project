@@ -18,17 +18,77 @@ public partial class Face : Node2D
 {
     private Vector3 _sunVector = new Vector3(0, -1, (float)Math.Sin(Math.PI / 3));
     
+    private Vector3I _coords;
     private Vertex[] _vertices;
     private Polygon2D _polygon = new Polygon2D();
     
     public Face()
-        : this(new[] { new Vertex(), new Vertex(), new Vertex() })
+        : this(new Vector3I(0, 0, 0), new[] { new Vertex(), new Vertex(), new Vertex() })
     {
     }
 
-    public Face(Vertex[] vertices)
+    public Face(Vector3I coords, Vertex[] vertices)
     {
+        _coords = coords;
         _vertices = vertices;
+    }
+    
+    public Vector3I GetNeighbor(Vector2 direction)
+    {
+        bool isLeftTriangle = _coords.Z == 0;
+        
+        var deltaN = new Vector3I(0, -1, 0);
+        var deltaSE = new Vector3I(0, 0, 0);
+        var deltaSW = new Vector3I(-1, 0, 0);
+        
+        var dirSE = Vector2.Right.Rotated((float)(Math.PI / 3));
+        var dirN = Vector2.Right.Rotated((float)(-Math.PI / 2));
+        var dirSW = Vector2.Right.Rotated((float)(2 * Math.PI / 3));
+        
+        if (isLeftTriangle)
+        {
+            if (Math.Abs(direction.AngleToPoint(dirN)) < 2 * Math.PI / 3)
+            {
+                return _coords + deltaN + new Vector3I(0, 0, 1);
+            }
+            
+            if (Math.Abs(direction.AngleToPoint(dirSE)) < 2 * Math.PI / 3)
+            {
+                return _coords + deltaSE + new Vector3I(0, 0, 1);
+            }
+            
+            if (Math.Abs(direction.AngleToPoint(dirSW)) < 2 * Math.PI / 3)
+            {
+                return _coords + deltaSW + new Vector3I(0, 0, 1);
+            }
+            
+            return new Vector3I(-999, -999, -999);
+        }
+        
+        var deltaS = -deltaN;
+        var deltaNW = -deltaSE;
+        var deltaNE = -deltaSW;
+        
+        var dirNW = Vector2.Right.Rotated((float)(-Math.PI / 3));
+        var dirS = Vector2.Right.Rotated((float)(Math.PI / 2));
+        var dirNE = Vector2.Right.Rotated((float)(-2 * Math.PI / 3));
+        
+        if (Math.Abs(direction.AngleToPoint(dirS)) < 2 * Math.PI / 3)
+        {
+            return _coords + deltaS + new Vector3I(0, 0, -1);
+        }
+        
+        if (Math.Abs(direction.AngleToPoint(dirNW)) < 2 * Math.PI / 3)
+        {
+            return _coords + deltaNW + new Vector3I(0, 0, -1);
+        }
+        
+        if (Math.Abs(direction.AngleToPoint(dirNE)) < 2 * Math.PI / 3)
+        {
+            return _coords + deltaNE + new Vector3I(0, 0, -1);
+        }
+        
+        return new Vector3I(-999, -999, -999);
     }
 
     public override void _Ready()
@@ -156,17 +216,15 @@ public partial class Faces : Node
     public override void _Ready()
     {
         var vertices = this.GetNode<Vertices>("/root/Root2D/TerrainSystem/Vertices");
-        var faces = new Node2D();
 
         var vertexDict = vertices.GetVertexDict();
-        Vector2I origin = new Vector2I(0, 0);
         
         HeightMap heightMap = TerrainHeightMap.Instance.GetHeightMap();
         Vector2I size = heightMap.GetSize();
         
         for (int row = 0; row < size.Y; row++)
         {
-            var rowOrigin = CoordinateUtils.PixelToVertexAxialCoords(new Vector2I(0, row));//CoordinateUtils.TranslateVector(CoordinateUtils.TranslateVector(origin, row, CoordinateUtils.Direction2SE), row, CoordinateUtils.Direction2W);
+            var rowOrigin = CoordinateUtils.PixelToVertexAxialCoords(new Vector2I(0, row));
             
             // first row, Left faces
             for (int index = 0; index < size.X; index++)
@@ -177,22 +235,21 @@ public partial class Faces : Node
                 
                 try
                 {           
-                    var face = new Face(new Vertex[]
+                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 0); // Left
+                    var face = new Face(faceCoords, new Vertex[]
                     {
                         vertexDict[CoordinateUtils.Vector2IToVector4I(indexCoords)],
                         vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSE)],
                         vertexDict[CoordinateUtils.Vector2IToVector4I(coordsE)],
                     });
                     
-                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 0); // Left
                     
                     _faceDict[faceCoords] = face;
                     AddChild(face);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // One of the vertices doesn't exist, no problem.
-                    GD.Print("Vertices did not print ", indexCoords, coordsSE, coordsE);
                 }
             }
             
@@ -205,14 +262,14 @@ public partial class Faces : Node
                 
                 try
                 {           
-                    var face = new Face(new Vertex[]
+                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 1); // Right
+                    var face = new Face(faceCoords, new Vertex[]
                     {
                         vertexDict[CoordinateUtils.Vector2IToVector4I(indexCoords)],
                         vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSE)],
                         vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSW)],
                     });
                     
-                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 1); // Right
                     
                     _faceDict[faceCoords] = face;
                     AddChild(face);

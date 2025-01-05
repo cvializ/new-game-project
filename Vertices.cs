@@ -45,7 +45,7 @@ public partial class Vertex : Node2D
     public override void _Ready()
     {
         //_label = new MyLabel($"V");
-        _label = new MyLabel($"{_coords}");
+        _label = new MyLabel($"{_height}");
         AddChild(_label);
     }
 
