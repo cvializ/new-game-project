@@ -35,6 +35,7 @@ public partial class Face : Node2D
     
     public Vector3I GetNeighbor(Vector2 direction)
     {
+        GD.Print("Neighbor direction", direction);
         bool isLeftTriangle = _coords.Z == 0;
         
         var deltaN = new Vector3I(0, -1, 0);
@@ -47,17 +48,27 @@ public partial class Face : Node2D
         
         if (isLeftTriangle)
         {
-            if (Math.Abs(direction.AngleToPoint(dirN)) < 2 * Math.PI / 3)
+            var dirs = new Vector2[] {
+                dirSE,
+                dirN,
+                dirSW,
+            };
+            var sorted = dirs.OrderBy(dir => direction.DistanceTo(dir)).ToArray();            
+            
+            foreach (Vector2 dir in sorted)
             {
-                return _coords + deltaN + new Vector3I(0, 0, 1);
+                GD.Print(dir, direction.AngleToPoint(dir));
             }
             
-            if (Math.Abs(direction.AngleToPoint(dirSE)) < 2 * Math.PI / 3)
+            if (sorted[0] == dirSE)
             {
                 return _coords + deltaSE + new Vector3I(0, 0, 1);
             }
-            
-            if (Math.Abs(direction.AngleToPoint(dirSW)) < 2 * Math.PI / 3)
+            if (sorted[0] == dirN)
+            {
+                return _coords + deltaN + new Vector3I(0, 0, 1);
+            }
+            if (sorted[0] == dirSW)
             {
                 return _coords + deltaSW + new Vector3I(0, 0, 1);
             }
@@ -65,28 +76,37 @@ public partial class Face : Node2D
             return new Vector3I(-999, -999, -999);
         }
         
+        GD.Print("bottom");
+        
         var deltaS = -deltaN;
         var deltaNW = -deltaSE;
         var deltaNE = -deltaSW;
         
-        var dirNW = Vector2.Right.Rotated((float)(-Math.PI / 3));
+        var dirNW = Vector2.Right.Rotated((float)(-2 * Math.PI / 3));
         var dirS = Vector2.Right.Rotated((float)(Math.PI / 2));
-        var dirNE = Vector2.Right.Rotated((float)(-2 * Math.PI / 3));
+        var dirNE = Vector2.Right.Rotated((float)(-Math.PI / 3));
         
-        if (Math.Abs(direction.AngleToPoint(dirS)) < 2 * Math.PI / 3)
-        {
-            return _coords + deltaS + new Vector3I(0, 0, -1);
-        }
+        var dirsBottom = new Vector2[] {
+            dirNW,
+            dirS,
+            dirNE,
+        };
+        var sortedBottom = dirsBottom.OrderBy(dir => direction.DistanceSquaredTo(dir)).ToArray();
         
-        if (Math.Abs(direction.AngleToPoint(dirNW)) < 2 * Math.PI / 3)
+        if (sortedBottom[0] == dirNW)
         {
             return _coords + deltaNW + new Vector3I(0, 0, -1);
         }
-        
-        if (Math.Abs(direction.AngleToPoint(dirNE)) < 2 * Math.PI / 3)
+        if (sortedBottom[0] == dirS)
+        {
+            return _coords + deltaS + new Vector3I(0, 0, -1);
+        }
+        if (sortedBottom[0] == dirNE)
         {
             return _coords + deltaNE + new Vector3I(0, 0, -1);
         }
+
+        GD.Print(direction.Angle());
         
         return new Vector3I(-999, -999, -999);
     }
@@ -280,5 +300,9 @@ public partial class Faces : Node
                 }
             }
         }
+        
+        var x = _faceDict[new Vector3I(0, 0, 1)];
+        
+        GD.Print(x.GetNeighbor(Vector2.Up));
     }
 }
