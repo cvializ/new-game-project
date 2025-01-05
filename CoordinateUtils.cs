@@ -101,42 +101,6 @@ public partial class CoordinateUtils : Godot.Node
         return initial + delta * direction;
     }
 
-    //public static Vector2 VertexCubeCoordsToGlobalCoords(Vector4I vertexCubeCoords)
-    //{
-        //Vector2 E = new Vector2(1, 0);
-    //
-        //int q = vertexCubeCoords.X;
-        //int r = vertexCubeCoords.Y;
-        //int s = vertexCubeCoords.Z;
-        //int w = vertexCubeCoords.W;
-     //
-        //Transform2D transformE = Transform2D.Identity.Translated(E);
-        //GD.Print("transformE", transformE);
-        //Transform2D transformSW = transformE.Rotated((float)(2 * Math.PI / 3)).Translated();
-        //Transform2D transformNW = transformE.Rotated((float)(-2 * Math.PI / 3));
-        //Transform2D transformSE = transformE.Rotated((float)(Math.PI / 3));
-        //GD.Print("transformSE", transformSE);
-        //
-        ////Vector2 E = new Vector2(1, 0);
-        ////Vector2 SW = E.Rotated((float)(2 * Math.PI / 3));
-        ////Vector2 NW = E.Rotated((float)(-2 * Math.PI / 3));
-        ////Vector2 SE = E.Rotated((float)(Math.PI / 3));
-        //
-        //
-        ////Vector2 result = (q * E + r * SW + s * NW + w * SE) * 32;
-        //
-        //Transform2D result = 
-            //transformE.Translated(new Vector2(q, 0)) * 
-            //transformSW.Translated(new Vector2(r, 0)) * 
-            //transformNW.Translated(new Vector2(s, 0)) * 
-            //transformSE.Translated(new Vector2(w, 0));
-//
-        //result = result.Scaled(new Vector2(32, 32));
-//
-        //GD.Print(result);
-        //return result.Origin;
-    //}
-    //
     public static Vector2 VertexCubeCoordsToGlobalCoords(Vector4I vertexCubeCoords)
     {
         int q = vertexCubeCoords.X;
@@ -184,6 +148,14 @@ public partial class CoordinateUtils : Godot.Node
         Vector4I vectorTranslatedEThenSE = TranslateVector(vectorTranslatedE, r, Direction4SE);
             
         return vectorTranslatedEThenSE;
+    }
+    
+    public static Vector2I Vector4IToVector2I(Vector4I initial)
+    {
+        Vector3I hexCubeCoords = new Vector3I(initial.X, initial.Y, initial.Z);
+        Vector2I oddQCoords = MathUtils.CubeToOddQ(hexCubeCoords);
+
+        return oddQCoords + (initial.W * Direction2SE);
     }
     
     private static int GetCarryCount(int w_i, int delta)

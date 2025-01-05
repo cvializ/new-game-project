@@ -109,9 +109,15 @@ public partial class Face : Node2D
 }
 
 public partial class Faces : Node
-{
-    private int _globalCount = 0;
+{   
+    public static Faces Instance;
+    public Faces()
+    {
+        Instance = this;
+    }
     
+    private Godot.Collections.Dictionary<Vector3I, Face> _faceDict = new Godot.Collections.Dictionary<Vector3I, Face>();
+   
     private Vector2 GetCirclePoint(int segmentIndex)
     {
         var angle = Math.PI / 3 * segmentIndex;
@@ -153,45 +159,118 @@ public partial class Faces : Node
         var faces = new Node2D();
 
         var vertexDict = vertices.GetVertexDict();
-        var centerVertices = vertices.GetCenterVertices();
-
-        int max = 0;
-        foreach (Vertex centerVertex in centerVertices)
+        Vector4I origin = new Vector4I(0, 0, 0, 0);
+        
+        HeightMap heightMap = TerrainHeightMap.Instance.GetHeightMap();
+        Vector2I size = heightMap.GetSize();
+        
+        
+        // first row, Left faces
+        for (int index = 0; index < size.X; index++)
         {
-            var centerCoords = centerVertex.GetCoords();
+            var indexCoords = CoordinateUtils.TranslateVector(origin, index - 1, CoordinateUtils.Direction4E);
+            var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction4SE);
+            var coordsE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction4E);
             
-            for (int i = 0; i < 6; i++)
-            {
-                var firstIndex = this.RotatingIndex(i, 6);
-                var secondIndex = this.RotatingIndex(i + 1, 6);
-
-                var firstCoords = Vertices.GetVertexFromCenter(centerCoords, firstIndex);
-                var secondCoords = Vertices.GetVertexFromCenter(centerCoords, secondIndex);
-
-                Vertex firstVertex, secondVertex;
-                try
-                {
-                    firstVertex = vertices.GetVertex(firstCoords);
-                    secondVertex = vertices.GetVertex(secondCoords);
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
+            try
+            {           
                 var face = new Face(new Vertex[]
                 {
-                    centerVertex,
-                    firstVertex,
-                    secondVertex,
+                    vertexDict[indexCoords],
+                    vertexDict[coordsSE],
+                    vertexDict[coordsE],
                 });
-
-                this.AddChild(face);
                 
-                if (max++ < 10)
-                {
-                    face.Print();
-                }
+                var vertexCoordsOddQ = CoordinateUtils.Vector4IToVector2I(indexCoords);
+                var faceCoords = new Vector3I(vertexCoordsOddQ.X, vertexCoordsOddQ.Y, 0); // Left
+                
+                _faceDict[faceCoords] = face;
+                AddChild(face);
+            }
+            catch (Exception)
+            {
+                // One of the vertices doesn't exist, no problem.
             }
         }
+        
+        // First row, right faces
+        for (int index = 0; index < size.X; index++)
+        {
+            var indexCoords = CoordinateUtils.TranslateVector(origin, index - 1, CoordinateUtils.Direction4E);
+            var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction4SE);
+            // TODO: something is broken about translating by SW
+            var indexMinusOneCoords = CoordinateUtils.TranslateVector(origin, index - 2, CoordinateUtils.Direction4E);            
+            var coordsSW = CoordinateUtils.TranslateVector(indexMinusOneCoords, 1, CoordinateUtils.Direction4SE);
+            GD.Print("Right Index Coords ", indexCoords);
+            GD.Print("Right SE Coords ", coordsSE);
+            GD.Print("Right SW Coords ", coordsSW);
+            
+            try
+            {           
+                var face = new Face(new Vertex[]
+                {
+                    vertexDict[indexCoords],
+                    vertexDict[coordsSE],
+                    vertexDict[coordsSW],
+                });
+                
+                var vertexCoordsOddQ = CoordinateUtils.Vector4IToVector2I(indexCoords);
+                var faceCoords = new Vector3I(vertexCoordsOddQ.X, vertexCoordsOddQ.Y, 1); // Right
+                
+                _faceDict[faceCoords] = face;
+                AddChild(face);
+            }
+            catch (Exception)
+            {
+                // One of the vertices doesn't exist, no problem.
+            }
+        }
+        
+        //var centerVertices = vertices.GetCenterVertices();
+//
+        ////int max = 0;
+        //foreach (Vertex centerVertex in centerVertices)
+        //{
+            //var centerCoords = centerVertex.GetCoords();
+            //
+            //for (int i = 0; i < 6; i++)
+            //{
+                //var firstIndex = this.RotatingIndex(i, 6);
+                //var secondIndex = this.RotatingIndex(i + 1, 6);
+//
+                //var firstCoords = Vertices.GetVertexFromCenter(centerCoords, firstIndex);
+                //var secondCoords = Vertices.GetVertexFromCenter(centerCoords, secondIndex);
+//
+                //Vertex firstVertex, secondVertex;
+                //try
+                //{
+                    //firstVertex = vertices.GetVertex(firstCoords);
+                    //secondVertex = vertices.GetVertex(secondCoords);
+                //}
+                //catch (Exception)
+                //{
+                    ////GD.Print("Exception!", firstCoords, secondCoords);
+                    //continue;
+                //}
+                //var face = new Face(new Vertex[]
+                //{
+                    //centerVertex,
+                    //firstVertex,
+                    //secondVertex,
+                //});
+                //
+                //// q, r, L/R
+                //Vector3I faceCoords = new Vector3I(0, 0, 0);
+                //
+                //_faceDict[faceCoords] = face;
+//
+                //this.AddChild(face);
+                //
+                ////if (max++ < 10)
+                ////{
+                    ////face.Print();
+                ////}
+            //}
+        //}
     }
 }

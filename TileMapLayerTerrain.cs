@@ -35,6 +35,7 @@ public partial class TileMapLayerTerrain : TileMapLayer
 
     private void _EmitCellClickSignal(Cell cell, int vertex)
     {
+        GD.Print("Click", cell.GetCoords());
         EmitSignal(SignalName.CellClick, cell, vertex);
     }
 
@@ -81,22 +82,13 @@ public partial class TileMapLayerTerrain : TileMapLayer
 
     public override void _Ready()
     {
-        var heightMap = new HeightMap("./heightmap_sm.png");
-        var image = heightMap.GetImage();
+        HeightMap _heightMap = TerrainHeightMap.Instance.GetHeightMap();
+        Vector2I size = _heightMap.GetSize();
         
-        if (image.GetWidth() % 3 > 0) 
-        {
-            GD.Print("ERROR: Image width should be multiple of 3");
-        }
-        if (image.GetHeight() % 2 > 0)
-        {
-            GD.Print("ERROR: Image height should be multiple of 2");
-        }
+        int cellsWide = (int)(size.X / 1.5) - 1;
+        int cellsTall = size.Y / 2;
         
-        int cellsWide = (int)(image.GetWidth() / 1.5) - 1;
-        int cellsTall = image.GetHeight() / 2;
-        
-        GD.Print($"Image is {image.GetWidth()}x{image.GetHeight()}");
+        GD.Print($"Size is {size}");
         GD.Print($"Map is {cellsWide}x{cellsTall}");
         
         var dirtTile = new Vector2I(0, 0);

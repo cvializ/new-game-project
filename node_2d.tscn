@@ -1,9 +1,9 @@
-[gd_scene load_steps=16 format=3 uid="uid://coeyoxva7s7xo"]
+[gd_scene load_steps=17 format=3 uid="uid://coeyoxva7s7xo"]
 
 [ext_resource type="Texture2D" uid="uid://dc51rdkmejjp" path="res://tiles/tileset.png" id="5_66dj5"]
 [ext_resource type="Script" path="res://Faces.cs" id="5_uidih"]
 [ext_resource type="Script" path="res://TileMapLayerTerrain.cs" id="6_0o22g"]
-[ext_resource type="Script" path="res://HeightMap.cs" id="6_knsir"]
+[ext_resource type="Script" path="res://TerrainHeightMap.cs" id="6_knsir"]
 [ext_resource type="Script" path="res://Cells.cs" id="6_kpry7"]
 [ext_resource type="Script" path="res://Control.cs" id="6_lfvxi"]
 [ext_resource type="Script" path="res://Vertices.cs" id="6_xgmhd"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://Edges.cs" id="8_12tvm"]
 [ext_resource type="Script" path="res://CoordinateUtils.cs" id="8_ea0o5"]
 [ext_resource type="Script" path="res://FpsLabel.cs" id="9_emmor"]
+[ext_resource type="Script" path="res://WaterSystem.cs" id="9_kgi0a"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6aob3"]
 texture = ExtResource("5_66dj5")
@@ -41,6 +42,9 @@ script = ExtResource("6_lfvxi")
 
 [node name="TerrainSystem" type="Node" parent="."]
 
+[node name="TerrainHeightMap" type="Node" parent="TerrainSystem"]
+script = ExtResource("6_knsir")
+
 [node name="TileMapLayerTerrain" type="TileMapLayer" parent="TerrainSystem"]
 tile_set = SubResource("TileSet_rjn3j")
 collision_enabled = false
@@ -55,13 +59,11 @@ script = ExtResource("6_xgmhd")
 [node name="Faces" type="Node" parent="TerrainSystem"]
 script = ExtResource("5_uidih")
 
-[node name="HeightMap" type="Node" parent="TerrainSystem"]
-script = ExtResource("6_knsir")
-
 [node name="Edges" type="Node" parent="TerrainSystem"]
 script = ExtResource("8_12tvm")
 
-[node name="Water" type="Node" parent="."]
+[node name="WaterSystem" type="Node" parent="."]
+script = ExtResource("9_kgi0a")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 392)

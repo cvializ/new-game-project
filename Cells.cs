@@ -4,9 +4,6 @@ using Godot;
 
 public partial class Cell : Node2D
 {
-    [Signal]
-    public delegate void CellClickEventHandler();
-
     private Vector3I _coords;
 
     public Cell() : this(new Vector3I(0, 0, 0))

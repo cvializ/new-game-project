@@ -2,6 +2,28 @@ using Godot;
 using System;
 
 
+public partial class WaterControl : Node
+{    
+    public static WaterControl Instance;
+    public WaterControl()
+    {
+        Instance = this;
+    }
+    
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (!@event.IsAction("water_1"))
+        {
+            
+        }
+        
+        if (!(@event is InputEventMouseButton mouseEvent))
+        {
+            return;
+        }
+    }
+}
+
 public partial class ViewControl : Node
 {
     [Signal]
@@ -97,6 +119,12 @@ public partial class Control : Node
         if (@event.IsAction("view_1"))
         {
             _selectedControl = 2;
+            return;
+        }
+        
+        if (@event.IsAction("water_1"))
+        {
+            _selectedControl = 3;
             return;
         }
     }

@@ -35,6 +35,7 @@ public partial class Vertex : Node2D
     {
         _coords = coords;
         _height = height;
+        //_water = new WaterProperties();
         
         ViewControl.Instance.OnChangeShowVertices += (showVertices) => {
             _label.SetVisible(showVertices);
@@ -43,6 +44,7 @@ public partial class Vertex : Node2D
 
     public override void _Ready()
     {
+        //_label = new MyLabel($"V");
         _label = new MyLabel($"{_height}");
         AddChild(_label);
     }
@@ -79,7 +81,14 @@ public partial class Vertex : Node2D
 
 public partial class Vertices : Node
 {
+    public static Vertices Instance;
+    public Vertices()
+    {
+        Instance = this;
+    }
+    
     private Godot.Collections.Dictionary<Vector4I, Vertex> vertexDict = new Godot.Collections.Dictionary<Vector4I, Vertex>();
+    private Godot.Collections.Dictionary<Vector2I, Vertex> vertexDict2i = new Godot.Collections.Dictionary<Vector2I, Vertex>();
     private int _maxHeight = 15;
 
     private Vector2 GetCirclePoint(int segmentIndex)
@@ -95,6 +104,13 @@ public partial class Vertices : Node
         var adjacent = radius * Math.Cos(-angle);
         var opposite = radius * Math.Sin(-angle);
         return new Vector2((float)adjacent, (float)opposite);
+    }
+    
+    public Edge[] GetEdges(Vertex vertex)
+    {
+        return GetSiblings(vertex).Select(siblingVertex => {
+            return Edges.Instance.GetEdge(vertex, siblingVertex);
+        }).ToArray();
     }
     
     public Vertex[] GetSiblings(Vertex vertex)
@@ -118,6 +134,10 @@ public partial class Vertices : Node
 
     public static Vector4I GetVertexFromCenter(Vector4I centerVertex, int index)
     {
+        if (centerVertex.W != 1)
+        {
+            GD.Print("SUCKSSSS");
+        }
         //var nwVertex = centerVertex - new Vector4I(0, 0, 0, 1);
         Vector4I direction;
         switch (index) 
@@ -173,7 +193,14 @@ public partial class Vertices : Node
     
     public Vertex GetVertex(Vector4I coords)
     {
-        return vertexDict[coords];
+        try 
+        {
+            return vertexDict[coords];
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
     
     public Vector2 VertexCubeCoordsToGlobalCoords(Vector4I cubeCoords)
@@ -208,16 +235,16 @@ public partial class Vertices : Node
 
         var tilMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
 
-        var heightMap = new HeightMap("./heightmap_sm.png");
+        var heightMap = TerrainHeightMap.Instance.GetHeightMap();
 
         Vector2I size = heightMap.GetSize();
         
-        var max = 0;
+        //var max = 0;
         for (int i = 0; i < size.X; i++)
         {
+            //if (max++ == 2) return;
             for (int j = 0; j < size.Y; j++)
             {
-                //if (max++ == 10) return;
                 Vector2I pixelCoords = new Vector2I(i, j);
                 Vector2I vertexAxialCoords = CoordinateUtils.PixelToVertexAxialCoords(pixelCoords);
                 Vector4I vertexCubeCoords = CoordinateUtils.Vector2IToVector4I(vertexAxialCoords);              
@@ -227,6 +254,7 @@ public partial class Vertices : Node
                 vertex.SetGlobalPosition(vertexGlobalCoords);
                 
                 this.vertexDict[vertexCubeCoords] = vertex;
+                this.vertexDict2i[vertexAxialCoords] = vertex;
                 this.AddChild(vertex);
             }
         }
