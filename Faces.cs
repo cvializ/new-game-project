@@ -159,73 +159,69 @@ public partial class Faces : Node
         var faces = new Node2D();
 
         var vertexDict = vertices.GetVertexDict();
-        Vector4I origin = new Vector4I(0, 0, 0, 0);
+        Vector2I origin = new Vector2I(0, 0);
         
         HeightMap heightMap = TerrainHeightMap.Instance.GetHeightMap();
         Vector2I size = heightMap.GetSize();
         
-        
-        // first row, Left faces
-        for (int index = 0; index < size.X; index++)
+        for (int row = 0; row < size.Y; row++)
         {
-            var indexCoords = CoordinateUtils.TranslateVector(origin, index - 1, CoordinateUtils.Direction4E);
-            var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction4SE);
-            var coordsE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction4E);
-            
-            try
-            {           
-                var face = new Face(new Vertex[]
-                {
-                    vertexDict[indexCoords],
-                    vertexDict[coordsSE],
-                    vertexDict[coordsE],
-                });
-                
-                var vertexCoordsOddQ = CoordinateUtils.Vector4IToVector2I(indexCoords);
-                var faceCoords = new Vector3I(vertexCoordsOddQ.X, vertexCoordsOddQ.Y, 0); // Left
-                
-                _faceDict[faceCoords] = face;
-                AddChild(face);
-            }
-            catch (Exception)
+            var rowOrigin = CoordinateUtils.TranslateVector(CoordinateUtils.TranslateVector(origin, row, CoordinateUtils.Direction2SE), row, CoordinateUtils.Direction2W);
+            // first row, Left faces
+            for (int index = 0; index < size.X; index++)
             {
-                // One of the vertices doesn't exist, no problem.
+                var indexCoords = CoordinateUtils.TranslateVector(rowOrigin, index - 1, CoordinateUtils.Direction2E);
+                var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction2SE);
+                var coordsE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction2E);
+                
+                try
+                {           
+                    var face = new Face(new Vertex[]
+                    {
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(indexCoords)],
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSE)],
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(coordsE)],
+                    });
+                    
+                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 0); // Left
+                    
+                    _faceDict[faceCoords] = face;
+                    AddChild(face);
+                }
+                catch (Exception e)
+                {
+                    // One of the vertices doesn't exist, no problem.
+                    GD.Print("Vertices did not print ", indexCoords, coordsSE, coordsE);
+                }
+            }
+            
+            // first row, Right faces
+            for (int index = 0; index < size.X; index++)
+            {
+                var indexCoords = CoordinateUtils.TranslateVector(rowOrigin, index, CoordinateUtils.Direction2E);
+                var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction2SE);
+                var coordsSW = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction2SW);
+                
+                try
+                {           
+                    var face = new Face(new Vertex[]
+                    {
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(indexCoords)],
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSE)],
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSW)],
+                    });
+                    
+                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 1); // Right
+                    
+                    _faceDict[faceCoords] = face;
+                    AddChild(face);
+                }
+                catch (Exception)
+                {
+                    // One of the vertices doesn't exist, no problem.
+                }
             }
         }
-        
-        // First row, right faces
-        for (int index = 0; index < size.X; index++)
-        {
-            var indexCoords = CoordinateUtils.TranslateVector(origin, index - 1, CoordinateUtils.Direction4E);
-            var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction4SE);
-            // TODO: something is broken about translating by SW
-            var indexMinusOneCoords = CoordinateUtils.TranslateVector(origin, index - 2, CoordinateUtils.Direction4E);            
-            var coordsSW = CoordinateUtils.TranslateVector(indexMinusOneCoords, 1, CoordinateUtils.Direction4SE);
-            GD.Print("Right Index Coords ", indexCoords);
-            GD.Print("Right SE Coords ", coordsSE);
-            GD.Print("Right SW Coords ", coordsSW);
-            
-            try
-            {           
-                var face = new Face(new Vertex[]
-                {
-                    vertexDict[indexCoords],
-                    vertexDict[coordsSE],
-                    vertexDict[coordsSW],
-                });
-                
-                var vertexCoordsOddQ = CoordinateUtils.Vector4IToVector2I(indexCoords);
-                var faceCoords = new Vector3I(vertexCoordsOddQ.X, vertexCoordsOddQ.Y, 1); // Right
-                
-                _faceDict[faceCoords] = face;
-                AddChild(face);
-            }
-            catch (Exception)
-            {
-                // One of the vertices doesn't exist, no problem.
-            }
-        }
-        
         //var centerVertices = vertices.GetCenterVertices();
 //
         ////int max = 0;

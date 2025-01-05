@@ -253,9 +253,8 @@ public partial class Vertices : Node
                 Vector2 vertexGlobalCoords = VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
                 vertex.SetGlobalPosition(vertexGlobalCoords);
                 
-                this.vertexDict[vertexCubeCoords] = vertex;
-                this.vertexDict2i[vertexAxialCoords] = vertex;
-                this.AddChild(vertex);
+                vertexDict[vertexCubeCoords] = vertex;
+                AddChild(vertex);
             }
         }
     }
