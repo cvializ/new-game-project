@@ -166,7 +166,8 @@ public partial class Faces : Node
         
         for (int row = 0; row < size.Y; row++)
         {
-            var rowOrigin = CoordinateUtils.TranslateVector(CoordinateUtils.TranslateVector(origin, row, CoordinateUtils.Direction2SE), row, CoordinateUtils.Direction2W);
+            var rowOrigin = CoordinateUtils.PixelToVertexAxialCoords(new Vector2I(0, row));//CoordinateUtils.TranslateVector(CoordinateUtils.TranslateVector(origin, row, CoordinateUtils.Direction2SE), row, CoordinateUtils.Direction2W);
+            
             // first row, Left faces
             for (int index = 0; index < size.X; index++)
             {
@@ -222,51 +223,5 @@ public partial class Faces : Node
                 }
             }
         }
-        //var centerVertices = vertices.GetCenterVertices();
-//
-        ////int max = 0;
-        //foreach (Vertex centerVertex in centerVertices)
-        //{
-            //var centerCoords = centerVertex.GetCoords();
-            //
-            //for (int i = 0; i < 6; i++)
-            //{
-                //var firstIndex = this.RotatingIndex(i, 6);
-                //var secondIndex = this.RotatingIndex(i + 1, 6);
-//
-                //var firstCoords = Vertices.GetVertexFromCenter(centerCoords, firstIndex);
-                //var secondCoords = Vertices.GetVertexFromCenter(centerCoords, secondIndex);
-//
-                //Vertex firstVertex, secondVertex;
-                //try
-                //{
-                    //firstVertex = vertices.GetVertex(firstCoords);
-                    //secondVertex = vertices.GetVertex(secondCoords);
-                //}
-                //catch (Exception)
-                //{
-                    ////GD.Print("Exception!", firstCoords, secondCoords);
-                    //continue;
-                //}
-                //var face = new Face(new Vertex[]
-                //{
-                    //centerVertex,
-                    //firstVertex,
-                    //secondVertex,
-                //});
-                //
-                //// q, r, L/R
-                //Vector3I faceCoords = new Vector3I(0, 0, 0);
-                //
-                //_faceDict[faceCoords] = face;
-//
-                //this.AddChild(face);
-                //
-                ////if (max++ < 10)
-                ////{
-                    ////face.Print();
-                ////}
-            //}
-        //}
     }
 }

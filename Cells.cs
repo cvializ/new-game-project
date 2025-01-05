@@ -13,7 +13,8 @@ public partial class Cell : Node2D
     public Cell(Vector3I coords)
     {
         _coords = coords;
-        this.Name = $"{coords}";
+        Name = $"{coords}";
+        //AddChild(new MyLabel($"{MathUtils.CubeToOddQ(coords)}"));
     }
     
     public Vector3I GetCoords()
@@ -43,7 +44,7 @@ public partial class Cells : Node
             var cellCoordsLocal = tileMapLayerTerrain.MapToLocal(mapCoords);
             cell.SetPosition(cellCoordsLocal);
             
-            this.AddChild(cell);
+            AddChild(cell);
         }
     }
 
