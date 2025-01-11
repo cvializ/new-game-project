@@ -25,13 +25,43 @@ public partial class Cell : Node2D
 
 public partial class Cells : Node
 {
+    [Signal]
+    public delegate void CellClickEventHandler(Cell cell, int vertex);
+    
+    public static Cells Instance;
+    
+    public Cells()
+    {
+        Instance = this;
+    }
+    
     private Godot.Collections.Dictionary<Vector3I, Cell> _cellDict = new Godot.Collections.Dictionary<Vector3I, Cell>();
 
+    public Cell GetCell(Vector3I cellCubeCoords)
+    {
+        return _cellDict[cellCubeCoords];
+    }
+    
+    public int GetVertexIndexFromDirection(Vector2 direction)
+    {
+        double length = direction.Length();
+        double angle = direction.Angle();
+        double normalizedAngle = (-angle + Math.Tau) % Math.Tau;
+        double rotatedAngle = (normalizedAngle + (4 * Math.PI / 3)) % (2 * Math.PI);
+        var vertexIndex = length < 10f ? 6 : (int)Math.Round(rotatedAngle / (Math.PI / 3));
+        
+        return vertexIndex;
+    }
+
+    public Godot.Collections.Array<Cell> GetCells()
+    {
+        return new Godot.Collections.Array<Cell>(_cellDict.Values);
+    }
+    
     public override void _Ready()
     {
-        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
-        var tileSize = tileMapLayerTerrain.GetTileSize();
-        var usedCells = tileMapLayerTerrain.GetUsedCells();
+        var tileSize = TileMapLayerTerrain.Instance.GetTileSize();
+        var usedCells = TileMapLayerTerrain.Instance.GetUsedCells();
 
         for (int i = 0; i < usedCells.Count; i++)
         {
@@ -41,20 +71,37 @@ public partial class Cells : Node
             var cell = new Cell(cubeCoords);
             _cellDict[cubeCoords] = cell;
             
-            var cellCoordsLocal = tileMapLayerTerrain.MapToLocal(mapCoords);
+            var cellCoordsLocal = TileMapLayerTerrain.Instance.MapToLocal(mapCoords);
             cell.SetPosition(cellCoordsLocal);
             
             AddChild(cell);
         }
-    }
+        
+        TileMapLayerTerrain.Instance.TileClick += (tileCoords, globalMousePosition) => 
+        {
+            Cell cell = GetCell(tileCoords);
+            var cellLocalCoords = cell.ToLocal(globalMousePosition);
+        
+            //double angle = (-cellLocalCoords.Angle() + Math.Tau) % Math.Tau;
+            //double rotatedAngle = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
+            //var vertexIndex = length < 10f ? 6 : (int)Math.Round(rotatedAngle / (Math.PI / 3));
+            
+            int vertexIndex = GetVertexIndexFromDirection(cellLocalCoords);
+            
+            GD.Print($"CELL CLICK tileCoords {tileCoords} vertexIndex {vertexIndex}");
+            
+            EmitSignal(SignalName.CellClick, GetCell(tileCoords), vertexIndex);
+        };
+         
+        CellClick += (cell, index) =>
+        {
+            if (Control.Instance.GetSelectedControl() != 0)
+            {
+                return;
+            }
 
-    public Godot.Collections.Array<Cell> GetCells()
-    {
-        return new Godot.Collections.Array<Cell>(_cellDict.Values);
-    }
-
-    public Cell GetCell(Vector3I cubeCoords)
-    {
-        return _cellDict[cubeCoords];
+            TileMapLayerTerrain.Instance.SetCell(MathUtils.CubeToOddQ(cell.GetCoords()), 0, TileControl.Instance.GetSelectedTile());
+        };
+        
     }
 }

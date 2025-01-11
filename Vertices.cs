@@ -216,17 +216,14 @@ public partial class Vertices : Node
 
     public override void _Ready()
     {
-        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
-        tileMapLayerTerrain.CellClick += (cell, index) =>
+        Cells.Instance.CellClick += (cell, index) =>
         {
             if (Control.Instance.GetSelectedControl() != 1)
             {
                 return;
             }
 
-            var mapCoords = tileMapLayerTerrain.LocalToMap(cell.GetPosition());
-            var coords = MathUtils.OddQToCube(mapCoords);
-            var vertexCoords = Vertices.TileToVertexCoord(coords, index);
+            var vertexCoords = Vertices.TileToVertexCoord(cell.GetCoords(), index);
 
             GD.Print("Cell: ", ((Cell)cell).GetCoords());
             var vertex = this.vertexDict[vertexCoords];
@@ -234,8 +231,6 @@ public partial class Vertices : Node
             
             EmitSignal(SignalName.VertexClick, vertex);
         };
-
-        var tilMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
 
         var heightMap = TerrainHeightMap.Instance.GetHeightMap();
 

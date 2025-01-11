@@ -371,8 +371,13 @@ public partial class Faces : Node
             Vector3I faceCoords = VertexToFace(cellCubeCoords);
             
             double angle = (-localCoords.Angle() + Math.Tau) % Math.Tau;
+            
             //var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
             //var vertex = (int)Math.Round(angle / (Math.PI / 3));
+            if (angle < Math.PI / 3)
+            {
+            
+            }
             
             GD.Print($"TILE CLICK: cellCubeCoords {cellCubeCoords}, faceCoords {faceCoords}, angle {angle}");
         };

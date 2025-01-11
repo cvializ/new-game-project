@@ -63,29 +63,9 @@ public partial class TileMapLayerTerrain : TileMapLayer
         var globalCoords = GetGlobalMousePosition();
         var localCoords = this.ToLocal(globalCoords);
         var mapCoords = this.LocalToMap(localCoords);
-        // Not circular because this is called async
-        var cells = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
         var cubeCoords = MathUtils.OddQToCube(mapCoords);
-        var cell = cells.GetCell(cubeCoords);
         
-        var cellLocalCoords = cell.ToLocal(globalCoords);
-        
-        EmitSignal(SignalName.TileClick, cubeCoords, cellLocalCoords.Normalized());
-        
-        var length = cellLocalCoords.Length();
-
-        if (length < 15f)
-        {
-            _EmitCellClickSignal(cell, 6);
-            return;
-        }
-
-        var angle = -cellLocalCoords.Angle(); //this.NormalizedAtan2(cellLocalCoords[1], cellLocalCoords[0]);
-        //GD.Print($"my angle {angle} vs vector angle ${cellLocalCoords.Angle()}");
-        var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
-        var vertex = (int)Math.Round(rotated / (Math.PI / 3));
-                
-       _EmitCellClickSignal(cell, vertex);
+        EmitSignal(SignalName.TileClick, cubeCoords, globalCoords);
     }
 
     public Vector2I GetTileSize()
@@ -106,7 +86,6 @@ public partial class TileMapLayerTerrain : TileMapLayer
         
         var dirtTile = new Vector2I(0, 0);
         var grassTile = new Vector2I(1, 0);
-        GD.Print($"SetCell {this.GetTileMapDataAsArray()}");
         
         for (int i = 0; i < cellsWide; i++)
         {
@@ -115,15 +94,5 @@ public partial class TileMapLayerTerrain : TileMapLayer
                 SetCell(new Vector2I(i, j), 4, grassTile);
             }
         }
-        
-        CellClick += (cell, index) =>
-        {
-            if (Control.Instance.GetSelectedControl() != 0)
-            {
-                return;
-            }
-
-            SetCell(MathUtils.CubeToOddQ(cell.GetCoords()), 0, TileControl.Instance.GetSelectedTile());
-        };
     }
 }

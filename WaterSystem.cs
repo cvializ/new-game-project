@@ -13,8 +13,7 @@ public partial class WaterSystem : Node
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
-        tileMapLayerTerrain.CellClick += (cell, index) =>
+        Cells.Instance.CellClick += (cell, index) =>
         {
             var oddQ = MathUtils.CubeToOddQ(cell.GetCoords());
             GD.Print("ODDQ", oddQ);
