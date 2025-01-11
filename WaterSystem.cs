@@ -2,11 +2,27 @@ using Godot;
 using System;
 using System.Linq;
 
+public partial class WaterUnit : Node
+{
+    private Face _face;
+    
+}
+
 public partial class WaterSystem : Node
 {
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
+        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
+        tileMapLayerTerrain.CellClick += (cell, index) =>
+        {
+            var oddQ = MathUtils.CubeToOddQ(cell.GetCoords());
+            GD.Print("ODDQ", oddQ);
+            
+            var face = Faces.Instance.GetFace(new Vector3I(oddQ.X, oddQ.Y, 0));
+            //face.Print();
+            face.SetWater(true);
+        };
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.

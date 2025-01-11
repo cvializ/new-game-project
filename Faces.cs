@@ -20,6 +20,7 @@ public partial class Face : Node2D
     
     private Vector3I _coords;
     private Vertex[] _vertices;
+    private bool _hasWater = false;
     private Polygon2D _polygon = new Polygon2D();
     
     public Face()
@@ -35,7 +36,7 @@ public partial class Face : Node2D
     
     public Vector3I GetNeighbor(Vector2 direction)
     {
-        GD.Print("Neighbor direction", direction);
+        //GD.Print("Neighbor direction", direction);
         bool isLeftTriangle = _coords.Z == 0;
         
         var deltaN = new Vector3I(0, -1, 0);
@@ -55,11 +56,6 @@ public partial class Face : Node2D
             };
             var sorted = dirs.OrderBy(dir => direction.DistanceTo(dir)).ToArray();            
             
-            foreach (Vector2 dir in sorted)
-            {
-                GD.Print(dir, direction.AngleToPoint(dir));
-            }
-            
             if (sorted[0] == dirSE)
             {
                 return _coords + deltaSE + new Vector3I(0, 0, 1);
@@ -76,7 +72,7 @@ public partial class Face : Node2D
             return new Vector3I(-999, -999, -999);
         }
         
-        GD.Print("bottom");
+        //GD.Print("bottom");
         
         var deltaS = -deltaN;
         var deltaNW = -deltaSE;
@@ -106,9 +102,51 @@ public partial class Face : Node2D
             return _coords + deltaNE + new Vector3I(0, 0, -1);
         }
 
-        GD.Print(direction.Angle());
+        //GD.Print(direction.Angle());
         
         return new Vector3I(-999, -999, -999);
+    }
+
+    public void SetWater(bool hasWater)
+    {
+        _hasWater = hasWater;
+        _Update();
+    }
+    
+    public bool GetHasWater()
+    {
+        return _hasWater;
+    }
+    
+    private double cumulativeDelta = 0;
+    public override void _Process(double delta)
+    {
+        cumulativeDelta += delta;
+        if (cumulativeDelta > 1)
+        {
+            Flow();
+            cumulativeDelta = 0;
+        }
+    }
+    
+    public void Flow()
+    {
+        if (!_hasWater)
+        {
+            return;
+        }
+        
+        var downhill = GetDownhillDirection();
+        var neighborCoords = GetNeighbor(downhill); // Is this working?
+        
+        var next = Faces.Instance.GetFace(neighborCoords);
+        if (next.GetHasWater())
+        {
+            return;
+        }
+        
+        SetWater(false);    
+        next.SetWater(true);
     }
 
     public override void _Ready()
@@ -152,7 +190,7 @@ public partial class Face : Node2D
     
         var brightness = bounceVector.Dot(cameraVector);
         
-        _polygon.SetColor(new Color(0, 0, 0, 1 - brightness));
+        _polygon.SetColor(new Color(0, 0, _hasWater ? 1 : 0, 1 - brightness));
     }
 
     public double GetSlope()
@@ -176,15 +214,15 @@ public partial class Face : Node2D
     
     public void Print()
     {
-        GD.Print("Face Start");
-        GD.Print("Vertices");
-        _vertices[0].Print();
-        _vertices[1].Print();
-        _vertices[2].Print();
-        GD.Print("Normal", _GetNormal());
-        GD.Print("Downhill", GetDownhillDirection());
-        GD.Print("Slope", GetSlope());
-        GD.Print("Face End");
+        //GD.Print("Face Start");
+        //GD.Print("Vertices");
+        //_vertices[0].Print();
+        //_vertices[1].Print();
+        //_vertices[2].Print();
+        //GD.Print("Normal", _GetNormal());
+        //GD.Print("Downhill", GetDownhillDirection());
+        //GD.Print("Slope", GetSlope());
+        //GD.Print("Face End");
     }
 }
 
@@ -231,6 +269,11 @@ public partial class Faces : Node
         }
 
         return index % count;
+    }
+
+    public Face GetFace(Vector3I faceCoords)
+    {
+        return _faceDict[faceCoords];
     }
 
     public override void _Ready()
@@ -301,8 +344,13 @@ public partial class Faces : Node
             }
         }
         
-        var x = _faceDict[new Vector3I(0, 0, 1)];
-        
-        GD.Print(x.GetNeighbor(Vector2.Up));
+        TileMapLayerTerrain.Instance.TileClick += (cubeCoords, localCoords) =>
+        {
+            Vector2I tileSize = TileMapLayerTerrain.Instance.GetTileSize();
+            Vector4I centerVertex = new Vector4I(cubeCoords.X, cubeCoords.Y, cubeCoords.Z, 1);
+            
+            var angle = localCoords.Angle();
+            GD.Print(cubeCoords, localCoords);
+        };
     }
 }

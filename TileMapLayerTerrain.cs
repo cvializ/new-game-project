@@ -4,8 +4,17 @@ using Godot;
 
 public partial class TileMapLayerTerrain : TileMapLayer
 {
+    public static TileMapLayerTerrain Instance;
+    public TileMapLayerTerrain()
+    {
+        Instance = this;
+    } 
+    
     [Signal]
     public delegate void CellClickEventHandler(Cell cell, int vertex);
+    
+    [Signal]
+    public delegate void TileClickEventHandler(Vector3I cubeCoords, Vector2 localPosition);
 
     private Vector2 GetCirclePoint(int segmentIndex)
     {
@@ -56,9 +65,13 @@ public partial class TileMapLayerTerrain : TileMapLayer
         var mapCoords = this.LocalToMap(localCoords);
         // Not circular because this is called async
         var cells = this.GetNode<Cells>("/root/Root2D/TerrainSystem/Cells");
-        var cell = cells.GetCell(MathUtils.OddQToCube(mapCoords));
+        var cubeCoords = MathUtils.OddQToCube(mapCoords);
+        var cell = cells.GetCell(cubeCoords);
         
         var cellLocalCoords = cell.ToLocal(globalCoords);
+        
+        EmitSignal(SignalName.TileClick, cubeCoords, cellLocalCoords.Normalized());
+        
         var length = cellLocalCoords.Length();
 
         if (length < 15f)
@@ -75,7 +88,7 @@ public partial class TileMapLayerTerrain : TileMapLayer
        _EmitCellClickSignal(cell, vertex);
     }
 
-    public Vector2 GetTileSize()
+    public Vector2I GetTileSize()
     {
         return this.GetTileSet().GetTileSize();
     }

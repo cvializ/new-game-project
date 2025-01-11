@@ -66,16 +66,16 @@ public partial class Edges : Node
     {
         // Iterate over vertices
         // Add edges of E, SE, SW.
-
-        foreach (Vertex vertex in Vertices.Instance.GetVertexDict().Values)
-        {
-            var coordsE = CoordinateUtils.TranslateVector(vertex.GetCoords(), 1, CoordinateUtils.Direction4E);
-            var coordsSE = CoordinateUtils.TranslateVector(vertex.GetCoords(), 1, CoordinateUtils.Direction4SE);
-            var coordsSW = CoordinateUtils.TranslateVector(vertex.GetCoords(), 1, CoordinateUtils.Direction4SW);
-            
-            _MaybeAddEdge(vertex, coordsE);
-            _MaybeAddEdge(vertex, coordsSE);
-            _MaybeAddEdge(vertex, coordsSW);
-        }
+//
+        //foreach (Vertex vertex in Vertices.Instance.GetVertexDict().Values)
+        //{
+            //var coordsE = CoordinateUtils.TranslateVector(vertex.GetCoords(), 1, CoordinateUtils.Direction4E);
+            //var coordsSE = CoordinateUtils.TranslateVector(vertex.GetCoords(), 1, CoordinateUtils.Direction4SE);
+            //var coordsSW = CoordinateUtils.TranslateVector(vertex.GetCoords(), 1, CoordinateUtils.Direction4SW);
+            //
+            //_MaybeAddEdge(vertex, coordsE);
+            //_MaybeAddEdge(vertex, coordsSE);
+            //_MaybeAddEdge(vertex, coordsSW);
+        //}
     }
 }
