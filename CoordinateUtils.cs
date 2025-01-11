@@ -101,23 +101,6 @@ public partial class CoordinateUtils : Godot.Node
         return initial + delta * direction;
     }
 
-    public static Vector2 VertexCubeCoordsToGlobalCoords(Vector4I vertexCubeCoords)
-    {
-        int q = vertexCubeCoords.X;
-        int r = vertexCubeCoords.Y;
-        int s = vertexCubeCoords.Z;
-        int w = vertexCubeCoords.W;
-        
-        Vector2 E = new Vector2(1, 0);
-        Vector2 SW = E.Rotated((float)(2 * Math.PI / 3)).Normalized();
-        Vector2 NW = E.Rotated((float)(-2 * Math.PI / 3)).Normalized();
-        Vector2 SE = E.Rotated((float)(Math.PI / 3)).Normalized();
-        
-        Vector2 result = (q * E + r * SW + s * NW + w * SE) * 32;
-        
-        return result;
-    }
-    
     public static Vector2I PixelToVertexAxialCoords(Vector2I pixelCoords)
     {
         int row = pixelCoords.Y;

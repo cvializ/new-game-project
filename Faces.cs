@@ -275,6 +275,26 @@ public partial class Faces : Node
     {
         return _faceDict[faceCoords];
     }
+    
+    //public Vector3I DirectionE = new Vector3I(1, 0, 0);
+    //
+    //public Vector3I TranslateFace(Vector3I faceCoords, Vector3I direction)
+    //{
+        //
+    //}
+    
+    
+    public Vector3I VertexToFace(Vector3I cellCubeCoords)
+    {
+        Vector2I axialCoords = MathUtils.CubeToAxial(cellCubeCoords);
+        
+        var y = axialCoords.Y * (CoordinateUtils.Direction2SE + CoordinateUtils.Direction2SW);
+        var x = axialCoords.X * (CoordinateUtils.Direction2SE +CoordinateUtils.Direction2E);
+        
+        var combo = (x + y);
+        
+        return new Vector3I(combo.X, combo.Y, 0);
+    }
 
     public override void _Ready()
     {
@@ -344,13 +364,17 @@ public partial class Faces : Node
             }
         }
         
-        TileMapLayerTerrain.Instance.TileClick += (cubeCoords, localCoords) =>
+        
+        TileMapLayerTerrain.Instance.TileClick += (cellCubeCoords, localCoords) =>
         {
-            Vector2I tileSize = TileMapLayerTerrain.Instance.GetTileSize();
-            Vector4I centerVertex = new Vector4I(cubeCoords.X, cubeCoords.Y, cubeCoords.Z, 1);
+            Vector4I cellVertexCoords = new Vector4I(cellCubeCoords.X, cellCubeCoords.Y, cellCubeCoords.Z, 0);
+            Vector3I faceCoords = VertexToFace(cellCubeCoords);
             
-            var angle = localCoords.Angle();
-            GD.Print(cubeCoords, localCoords);
+            double angle = (-localCoords.Angle() + Math.Tau) % Math.Tau;
+            //var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
+            //var vertex = (int)Math.Round(angle / (Math.PI / 3));
+            
+            GD.Print($"TILE CLICK: cellCubeCoords {cellCubeCoords}, faceCoords {faceCoords}, angle {angle}");
         };
     }
 }

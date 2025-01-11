@@ -15,10 +15,7 @@ using Godot;
 // rate of 
 
 public partial class Vertex : Node2D
-{
-    [Signal]
-    public delegate void VertexClickEventHandler(Vertex vertex, int height);
-    
+{    
     [Signal]
     public delegate void OnHeightChangeEventHandler(Vertex vertex, int height);
 
@@ -81,6 +78,9 @@ public partial class Vertex : Node2D
 
 public partial class Vertices : Node
 {
+    [Signal]
+    public delegate void VertexClickEventHandler(Vertex vertex, int height);
+    
     public static Vertices Instance;
     public Vertices()
     {
@@ -231,6 +231,8 @@ public partial class Vertices : Node
             GD.Print("Cell: ", ((Cell)cell).GetCoords());
             var vertex = this.vertexDict[vertexCoords];
             vertex.SetHeight(vertex.GetHeight() + 1);
+            
+            EmitSignal(SignalName.VertexClick, vertex);
         };
 
         var tilMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
