@@ -48,7 +48,8 @@ public partial class Edges : Node
             edgeDict[$"{startCoords}{endCoords}"] = edge;
             edgeDict[$"{endCoords}{startCoords}"] = edge;
             edge.SetGlobalPosition((startVertex.GetGlobalPosition() + endVertex.GetGlobalPosition()) / 2);
-            this.AddChild(edge);
+            
+            AddChild(edge);
         }
         catch (Exception)
         {

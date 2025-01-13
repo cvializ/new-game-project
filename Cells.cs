@@ -77,15 +77,11 @@ public partial class Cells : Node
             AddChild(cell);
         }
         
-        TileMapLayerTerrain.Instance.TileClick += (tileCoords, globalMousePosition) => 
+        TileMapLayerTerrain.Instance.TileClick += (tileCoords, tileMapMousePosition) => 
         {
             Cell cell = GetCell(tileCoords);
-            var cellLocalCoords = cell.ToLocal(globalMousePosition);
-        
-            //double angle = (-cellLocalCoords.Angle() + Math.Tau) % Math.Tau;
-            //double rotatedAngle = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
-            //var vertexIndex = length < 10f ? 6 : (int)Math.Round(rotatedAngle / (Math.PI / 3));
             
+            Vector2 cellLocalCoords = cell.ToLocal(tileMapMousePosition);
             int vertexIndex = GetVertexIndexFromDirection(cellLocalCoords);
             
             GD.Print($"CELL CLICK tileCoords {tileCoords} vertexIndex {vertexIndex}");

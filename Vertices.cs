@@ -191,17 +191,24 @@ public partial class Vertices : Node
         return centerVertices;
     }
     
-    public Vertex GetVertex(Vector4I coords)
+    public Vertex GetVertex(Vector4I vertexCoords)
     {
         try 
         {
-            return vertexDict[coords];
+            return vertexDict[vertexCoords];
         }
         catch (Exception)
         {
             return null;
         }
     }
+    
+    //public Vertex GetVertex(Vector2I axialCoords)
+    //{
+        //
+        //
+        //return GetVertex(new Vector4I());
+    //}
     
     public Vector2 VertexCubeCoordsToGlobalCoords(Vector4I cubeCoords)
     {

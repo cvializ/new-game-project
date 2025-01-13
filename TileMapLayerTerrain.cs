@@ -65,7 +65,7 @@ public partial class TileMapLayerTerrain : TileMapLayer
         var mapCoords = this.LocalToMap(localCoords);
         var cubeCoords = MathUtils.OddQToCube(mapCoords);
         
-        EmitSignal(SignalName.TileClick, cubeCoords, globalCoords);
+        EmitSignal(SignalName.TileClick, cubeCoords, localCoords);
     }
 
     public Vector2I GetTileSize()

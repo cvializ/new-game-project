@@ -129,6 +129,11 @@ public partial class Face : Node2D
         }
     }
     
+    public Vector3I GetCoords()
+    {
+        return _coords;
+    }
+    
     public void Flow()
     {
         if (!_hasWater)
@@ -273,16 +278,15 @@ public partial class Faces : Node
 
     public Face GetFace(Vector3I faceCoords)
     {
-        return _faceDict[faceCoords];
+        try 
+        {
+            return _faceDict[faceCoords];            
+        } 
+        catch (Exception)
+        {
+            throw new Exception($"Could not find face at {faceCoords}");
+        }
     }
-    
-    //public Vector3I DirectionE = new Vector3I(1, 0, 0);
-    //
-    //public Vector3I TranslateFace(Vector3I faceCoords, Vector3I direction)
-    //{
-        //
-    //}
-    
     
     public Vector3I VertexToFace(Vector3I cellCubeCoords)
     {
@@ -295,12 +299,44 @@ public partial class Faces : Node
         
         return new Vector3I(combo.X, combo.Y, 0);
     }
+    
+    public Vector3I GetFaceFromCellVertex(Vector3I cellCubeCoords, double angle)
+    {
+        Vector3I faceCoords = VertexToFace(cellCubeCoords);
+        Face face = GetFace(faceCoords);
+        
+        //var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
+        //var vertex = (int)Math.Round(angle / (Math.PI / 3));
+        if (angle < Math.PI / 3)
+        {
+            return face.GetNeighbor(Vector2.Right);
+        }
+        
+        if (angle < 2 * Math.PI / 3)
+        {
+            return face.GetCoords();
+        }
+        
+        if (angle < Math.PI)
+        {
+            return face.GetNeighbor(Vector2.Left);
+        }
+        
+        if (angle < 4 * Math.PI / 3)
+        {
+            var leftNeighborCoords = face.GetNeighbor(Vector2.Left);
+            GD.Print("LEFT NEIGHBOR ", leftNeighborCoords);
+            var leftNeighbor = GetFace(leftNeighborCoords);
+            
+            return leftNeighbor.GetNeighbor(Vector2.Down);
+        }
+        
+        return new Vector3I();
+    }
 
     public override void _Ready()
     {
-        var vertices = this.GetNode<Vertices>("/root/Root2D/TerrainSystem/Vertices");
-
-        var vertexDict = vertices.GetVertexDict();
+        var vertexDict = Vertices.Instance.GetVertexDict();
         
         HeightMap heightMap = TerrainHeightMap.Instance.GetHeightMap();
         Vector2I size = heightMap.GetSize();
@@ -328,6 +364,8 @@ public partial class Faces : Node
                     
                     
                     _faceDict[faceCoords] = face;
+                    GD.Print("FACE COORDS, ", faceCoords);
+                    
                     AddChild(face);
                 }
                 catch (Exception)
@@ -336,16 +374,18 @@ public partial class Faces : Node
                 }
             }
             
+            //var max = 0;
             // first row, Right faces
             for (int index = 0; index < size.X; index++)
             {
+                //if (max++ == 1) return;
                 var indexCoords = CoordinateUtils.TranslateVector(rowOrigin, index, CoordinateUtils.Direction2E);
                 var coordsSE = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction2SE);
                 var coordsSW = CoordinateUtils.TranslateVector(indexCoords, 1, CoordinateUtils.Direction2SW);
                 
                 try
                 {           
-                    var faceCoords = new Vector3I(indexCoords.X, indexCoords.Y, 1); // Right
+                    var faceCoords = new Vector3I(indexCoords.X - 1, indexCoords.Y, 1); // Right
                     var face = new Face(faceCoords, new Vertex[]
                     {
                         vertexDict[CoordinateUtils.Vector2IToVector4I(indexCoords)],
@@ -355,6 +395,10 @@ public partial class Faces : Node
                     
                     
                     _faceDict[faceCoords] = face;
+                    //GD.Print("FACE COORDS, ", faceCoords);
+                    //GD.Print($"{CoordinateUtils.Vector2IToVector4I(indexCoords)} CoordinateUtils.Vector2IToVector4I(indexCoords)");
+                    //GD.Print($"{CoordinateUtils.Vector2IToVector4I(coordsSE)} CoordinateUtils.Vector2IToVector4I(coordsSE)");
+                    //GD.Print($"{CoordinateUtils.Vector2IToVector4I(coordsSW)} CoordinateUtils.Vector2IToVector4I(coordsSW)");
                     AddChild(face);
                 }
                 catch (Exception)
@@ -365,19 +409,21 @@ public partial class Faces : Node
         }
         
         
-        TileMapLayerTerrain.Instance.TileClick += (cellCubeCoords, localCoords) =>
+        TileMapLayerTerrain.Instance.TileClick += (cellCubeCoords, tileMapMousePosition) =>
         {
-            Vector4I cellVertexCoords = new Vector4I(cellCubeCoords.X, cellCubeCoords.Y, cellCubeCoords.Z, 0);
-            Vector3I faceCoords = VertexToFace(cellCubeCoords);
+            //Vector4I cellVertexCoords = new Vector4I(cellCubeCoords.X, cellCubeCoords.Y, cellCubeCoords.Z, 0);
+            //Vector3I faceCoords = VertexToFace(cellCubeCoords);
+            Cell cell = Cells.Instance.GetCell(cellCubeCoords);
+            
+            var localCoords = cell.ToLocal(tileMapMousePosition);
             
             double angle = (-localCoords.Angle() + Math.Tau) % Math.Tau;
             
+            
+            //GetFace(new Vector3I(-1, 1, 0));
             //var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
             //var vertex = (int)Math.Round(angle / (Math.PI / 3));
-            if (angle < Math.PI / 3)
-            {
-            
-            }
+            var faceCoords = GetFaceFromCellVertex(cellCubeCoords, angle);
             
             GD.Print($"TILE CLICK: cellCubeCoords {cellCubeCoords}, faceCoords {faceCoords}, angle {angle}");
         };
