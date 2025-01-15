@@ -87,24 +87,8 @@ public partial class Vertices : Node
         Instance = this;
     }
     
-    private Godot.Collections.Dictionary<Vector4I, Vertex> vertexDict = new Godot.Collections.Dictionary<Vector4I, Vertex>();
-    private Godot.Collections.Dictionary<Vector2I, Vertex> vertexDict2i = new Godot.Collections.Dictionary<Vector2I, Vertex>();
+    private Godot.Collections.Dictionary<Vector4I, Vertex> _vertexDict = new Godot.Collections.Dictionary<Vector4I, Vertex>();
     private int _maxHeight = 15;
-
-    private Vector2 GetCirclePoint(int segmentIndex)
-    {
-        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
-        var tileSize = tileMapLayerTerrain.GetTileSize();
-        var radius = Math.Max(tileSize[0], tileSize[1]) / 2;
-        var fudge = 2 * Math.PI / 3;
-        var angle = fudge + (2 * Math.PI / 6 * segmentIndex);
-
-        // Use -angle to adjust for Godot's coordinate being different
-        // than my mental ones
-        var adjacent = radius * Math.Cos(-angle);
-        var opposite = radius * Math.Sin(-angle);
-        return new Vector2((float)adjacent, (float)opposite);
-    }
     
     public Edge[] GetEdges(Vertex vertex)
     {
@@ -118,12 +102,12 @@ public partial class Vertices : Node
         Vector4I vertexCoords = vertex.GetCoords();
         
         return new Vertex[] {
-            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4NW)],
-            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4W)],
-            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4SW)],
-            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4SE)],
-            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4E)],
-            vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4NE)],
+            _vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4NW)],
+            _vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4W)],
+            _vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4SW)],
+            _vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4SE)],
+            _vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4E)],
+            _vertexDict[CoordinateUtils.TranslateVector(vertexCoords, 1, CoordinateUtils.Direction4NE)],
         };
     }
     
@@ -177,25 +161,11 @@ public partial class Vertices : Node
         return GetVertexFromCenter(centerVertex, index);
     }
     
-    public List<Vertex> GetCenterVertices()
-    {
-        var centerVertices = new List<Vertex>();
-        foreach (Vector4I key in this.vertexDict.Keys)
-        {
-            if (vertexDict[key].GetCoords().W == 1)
-            {
-                centerVertices.Add(vertexDict[key]);
-            }
-        }
-        
-        return centerVertices;
-    }
-    
     public Vertex GetVertex(Vector4I vertexCoords)
     {
         try 
         {
-            return vertexDict[vertexCoords];
+            return _vertexDict[vertexCoords];
         }
         catch (Exception)
         {
@@ -212,13 +182,12 @@ public partial class Vertices : Node
     
     public Vector2 VertexCubeCoordsToGlobalCoords(Vector4I cubeCoords)
     {
-        var tileMapLayerTerrain = this.GetNode<TileMapLayerTerrain>("/root/Root2D/TerrainSystem/TileMapLayerTerrain");
         var angle = new Vector2(1, 0).Rotated((float)(Math.PI / 3)) * 32;
         
         Vector2I oddQ = MathUtils.CubeToOddQ(new Vector3I(cubeCoords.X, cubeCoords.Y, cubeCoords.Z));
-        Vector2 localPosition = tileMapLayerTerrain.MapToLocal(oddQ) + angle * cubeCoords.W - angle;
+        Vector2 localPosition = TileMapLayerTerrain.Instance.MapToLocal(oddQ) + angle * cubeCoords.W - angle;
         
-        return tileMapLayerTerrain.ToGlobal(localPosition);
+        return TileMapLayerTerrain.Instance.ToGlobal(localPosition);
     }
 
     public override void _Ready()
@@ -233,7 +202,7 @@ public partial class Vertices : Node
             var vertexCoords = Vertices.TileToVertexCoord(cell.GetCoords(), index);
 
             GD.Print("Cell: ", ((Cell)cell).GetCoords());
-            var vertex = this.vertexDict[vertexCoords];
+            var vertex = _vertexDict[vertexCoords];
             vertex.SetHeight(vertex.GetHeight() + 1);
             
             EmitSignal(SignalName.VertexClick, vertex);
@@ -257,7 +226,7 @@ public partial class Vertices : Node
                 Vector2 vertexGlobalCoords = VertexCubeCoordsToGlobalCoords(vertexCubeCoords);
                 vertex.SetGlobalPosition(vertexGlobalCoords);
                 
-                vertexDict[vertexCubeCoords] = vertex;
+                _vertexDict[vertexCubeCoords] = vertex;
                 AddChild(vertex);
             }
         }
@@ -265,6 +234,6 @@ public partial class Vertices : Node
 
     public Godot.Collections.Dictionary<Vector4I, Vertex> GetVertexDict()
     {
-        return this.vertexDict;
+        return _vertexDict;
     }
 }

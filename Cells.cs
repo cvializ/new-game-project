@@ -14,7 +14,6 @@ public partial class Cell : Node2D
     {
         _coords = coords;
         Name = $"{coords}";
-        //AddChild(new MyLabel($"{MathUtils.CubeToOddQ(coords)}"));
     }
     
     public Vector3I GetCoords()

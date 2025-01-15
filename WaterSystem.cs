@@ -13,13 +13,26 @@ public partial class WaterSystem : Node
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        Cells.Instance.CellClick += (cell, index) =>
-        {
-            var oddQ = MathUtils.CubeToOddQ(cell.GetCoords());
-            GD.Print("ODDQ", oddQ);
+        //Cells.Instance.CellClick += (cell, index) =>
+        //{
+            //var oddQ = MathUtils.CubeToOddQ(cell.GetCoords());
+            //GD.Print("ODDQ", oddQ);
+            //
+            //var face = Faces.Instance.GetFace(new Vector3I(oddQ.X, oddQ.Y, 0));
+            ////face.Print();
+            //face.SetWater(true);
+        //};
+        
+        TileMapLayerTerrain.Instance.TileClick += (cellCubeCoords, tileMapMousePosition) =>
+        {;
+            Cell cell = Cells.Instance.GetCell(cellCubeCoords);
+            Vector2 localCoords = cell.ToLocal(tileMapMousePosition);
             
-            var face = Faces.Instance.GetFace(new Vector3I(oddQ.X, oddQ.Y, 0));
-            //face.Print();
+            double angle = (-localCoords.Angle() + Math.Tau) % Math.Tau;
+            
+            Vector3I faceCoords = Faces.Instance.GetFaceFromCellVertex(cellCubeCoords, angle);
+            
+            Face face = Faces.Instance.GetFace(faceCoords);
             face.SetWater(true);
         };
     }

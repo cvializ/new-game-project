@@ -172,7 +172,24 @@ public partial class Face : Node2D
     
         _Update();
         
-        this.AddChild(_polygon);
+        AddChild(_polygon);
+        
+    }
+    
+    public Vector2 GetCenter()
+    {
+        var polygonPoints = _polygon.Polygon;
+        return new Vector2(
+            (
+                polygonPoints[0].X +
+                polygonPoints[1].X +
+                polygonPoints[2].X
+            ) / 3, 
+            (
+                polygonPoints[0].Y +
+                polygonPoints[1].Y +
+                polygonPoints[2].Y
+            ) / 3);
     }
 
     private Vector3 _GetNormal()
@@ -187,6 +204,20 @@ public partial class Face : Node2D
         return faceNormalVector;
     }
 
+    private Arrow _arrow;
+
+    private void _UpdateArrow()
+    {
+        RemoveChild(_arrow);
+        
+        _arrow = new Arrow();
+        _arrow.Rotate(GetDownhillDirection().Angle());
+        _arrow.SetGlobalPosition(GetCenter());
+        
+        AddChild(_arrow);
+        
+    }
+
     private void _Update()
     {   
         var faceNormalVector = _GetNormal();
@@ -196,6 +227,8 @@ public partial class Face : Node2D
         var brightness = bounceVector.Dot(cameraVector);
         
         _polygon.SetColor(new Color(0, 0, _hasWater ? 1 : 0, 1 - brightness));
+        
+        _UpdateArrow();
     }
 
     public double GetSlope()
@@ -216,23 +249,14 @@ public partial class Face : Node2D
         Vector2 direction = new Vector2(normalVector.X, normalVector.Y);
         return direction.Normalized();
     }
-    
-    public void Print()
-    {
-        //GD.Print("Face Start");
-        //GD.Print("Vertices");
-        //_vertices[0].Print();
-        //_vertices[1].Print();
-        //_vertices[2].Print();
-        //GD.Print("Normal", _GetNormal());
-        //GD.Print("Downhill", GetDownhillDirection());
-        //GD.Print("Slope", GetSlope());
-        //GD.Print("Face End");
-    }
 }
 
 public partial class Faces : Node
 {   
+    [Signal]
+    public delegate void FaceClickEventHandler(Face face);
+    
+    
     public static Faces Instance;
     public Faces()
     {
@@ -240,41 +264,6 @@ public partial class Faces : Node
     }
     
     private Godot.Collections.Dictionary<Vector3I, Face> _faceDict = new Godot.Collections.Dictionary<Vector3I, Face>();
-   
-    private Vector2 GetCirclePoint(int segmentIndex)
-    {
-        var angle = Math.PI / 3 * segmentIndex;
-        var adjacent = (64 / 2) * Math.Cos((2 * Math.PI) - angle);
-        var opposite = (64 / 2) * Math.Sin((2 * Math.PI) - angle);
-
-        // Clamp
-        if (opposite < -27)
-        {
-            opposite = -27;
-        }
-
-        if (opposite > 27)
-        {
-            opposite = 27;
-        }
-
-        return new Vector2((float)adjacent, (float)opposite);
-    }
-
-    private int RotatingIndex(int index, int count)
-    {
-        if (index == -1)
-        {
-            return count - 1;
-        }
-
-        if (index == -2)
-        {
-            return count - 2;
-        }
-
-        return index % count;
-    }
 
     public Face GetFace(Vector3I faceCoords)
     {
@@ -325,13 +314,31 @@ public partial class Faces : Node
         if (angle < 4 * Math.PI / 3)
         {
             var leftNeighborCoords = face.GetNeighbor(Vector2.Left);
-            GD.Print("LEFT NEIGHBOR ", leftNeighborCoords);
             var leftNeighbor = GetFace(leftNeighborCoords);
             
-            return leftNeighbor.GetNeighbor(Vector2.Down);
+            var southNeighborOfleftNeighborCoords = leftNeighbor.GetNeighbor(Vector2.Down);
+            return southNeighborOfleftNeighborCoords;
         }
         
-        return new Vector3I();
+        if (angle < 5 * Math.PI / 3)
+        {
+            
+            var leftNeighborCoords = face.GetNeighbor(Vector2.Left);
+            var leftNeighbor = GetFace(leftNeighborCoords);
+            
+            var southNeighborOfleftNeighborCoords = leftNeighbor.GetNeighbor(Vector2.Down);
+            var southNeighborOfleftNeighbor = GetFace(southNeighborOfleftNeighborCoords);
+            
+            var goal = southNeighborOfleftNeighbor.GetNeighbor(Vector2.Right);
+            
+            return goal;
+        }
+        
+        var rightNeighborCoords = face.GetNeighbor(Vector2.Right);
+        var rightNeighbor = GetFace(rightNeighborCoords);
+        
+        var southNeighborOfRightNeighborCoords = rightNeighbor.GetNeighbor(Vector2.Down);
+        return southNeighborOfRightNeighborCoords;
     }
 
     public override void _Ready()
@@ -362,9 +369,8 @@ public partial class Faces : Node
                         vertexDict[CoordinateUtils.Vector2IToVector4I(coordsE)],
                     });
                     
-                    
                     _faceDict[faceCoords] = face;
-                    GD.Print("FACE COORDS, ", faceCoords);
+                    //GD.Print("FACE COORDS, ", faceCoords);
                     
                     AddChild(face);
                 }
@@ -395,10 +401,6 @@ public partial class Faces : Node
                     
                     
                     _faceDict[faceCoords] = face;
-                    //GD.Print("FACE COORDS, ", faceCoords);
-                    //GD.Print($"{CoordinateUtils.Vector2IToVector4I(indexCoords)} CoordinateUtils.Vector2IToVector4I(indexCoords)");
-                    //GD.Print($"{CoordinateUtils.Vector2IToVector4I(coordsSE)} CoordinateUtils.Vector2IToVector4I(coordsSE)");
-                    //GD.Print($"{CoordinateUtils.Vector2IToVector4I(coordsSW)} CoordinateUtils.Vector2IToVector4I(coordsSW)");
                     AddChild(face);
                 }
                 catch (Exception)
@@ -408,24 +410,20 @@ public partial class Faces : Node
             }
         }
         
-        
         TileMapLayerTerrain.Instance.TileClick += (cellCubeCoords, tileMapMousePosition) =>
-        {
-            //Vector4I cellVertexCoords = new Vector4I(cellCubeCoords.X, cellCubeCoords.Y, cellCubeCoords.Z, 0);
-            //Vector3I faceCoords = VertexToFace(cellCubeCoords);
+        {;
             Cell cell = Cells.Instance.GetCell(cellCubeCoords);
-            
-            var localCoords = cell.ToLocal(tileMapMousePosition);
+            Vector2 localCoords = cell.ToLocal(tileMapMousePosition);
             
             double angle = (-localCoords.Angle() + Math.Tau) % Math.Tau;
             
+            Vector3I faceCoords = GetFaceFromCellVertex(cellCubeCoords, angle);
             
-            //GetFace(new Vector3I(-1, 1, 0));
-            //var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
-            //var vertex = (int)Math.Round(angle / (Math.PI / 3));
-            var faceCoords = GetFaceFromCellVertex(cellCubeCoords, angle);
-            
-            GD.Print($"TILE CLICK: cellCubeCoords {cellCubeCoords}, faceCoords {faceCoords}, angle {angle}");
+            EmitSignal(SignalName.FaceClick, GetFace(faceCoords));
+        };
+        
+        FaceClick += (face) => {
+            GD.Print($"TILE CLICK: faceCoords {face.GetCoords()}");
         };
     }
 }

@@ -16,32 +16,6 @@ public partial class TileMapLayerTerrain : TileMapLayer
     [Signal]
     public delegate void TileClickEventHandler(Vector3I cubeCoords, Vector2 localPosition);
 
-    private Vector2 GetCirclePoint(int segmentIndex)
-    {
-        var angle = Math.PI / 3 * segmentIndex;
-        var adjacent = (64 / 2) * Math.Cos((2 * Math.PI) - angle);
-        var opposite = (64 / 2) * Math.Sin((2 * Math.PI) - angle);
-
-        // Clamp
-        if (opposite < -27)
-        {
-            opposite = -27;
-        }
-
-        if (opposite > 27)
-        {
-            opposite = 27;
-        }
-
-        return new Vector2((float)adjacent, (float)opposite);
-    }
-
-    private double NormalizedAtan2(double y, double x)
-    {
-        var angle = -Math.Atan2(y, x);
-        return angle > 0 ? angle : angle + (Math.PI * 2);
-    }
-
     private void _EmitCellClickSignal(Cell cell, int vertex)
     {
         GD.Print("Click", cell.GetCoords());
