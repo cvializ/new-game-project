@@ -395,8 +395,8 @@ public partial class Faces : Node
                     var face = new Face(faceCoords, new Vertex[]
                     {
                         vertexDict[CoordinateUtils.Vector2IToVector4I(indexCoords)],
-                        vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSE)],
                         vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSW)],
+                        vertexDict[CoordinateUtils.Vector2IToVector4I(coordsSE)],
                     });
                     
                     
