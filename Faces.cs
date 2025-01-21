@@ -130,7 +130,7 @@ public partial class Face : Node2D
     public override void _Process(double delta)
     {
         cumulativeDelta += delta;
-        if (cumulativeDelta > 1)
+        if (cumulativeDelta > .25)
         {
             Flow();
             cumulativeDelta = 0;
@@ -258,15 +258,13 @@ public partial class Face : Node2D
         // I guess it's the normal's  X,Y values
         Vector2 direction = new Vector2(normalVector.X, normalVector.Y);
         
+        // What do we do if it's flat? Random direction I guess
         if (direction == new Vector2(0, 0))
         {
             float randomAngle = (float)(Math.PI * 2 * Face.Random.NextDouble());
-            
-            GD.Print("NORMAL (random)", normalVector);
             return Vector2.Right.Rotated(randomAngle).Normalized();
         }
         
-        GD.Print("NORMAL", normalVector);
         return direction.Normalized();
     }
 }

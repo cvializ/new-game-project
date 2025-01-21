@@ -35,6 +35,10 @@ public partial class WaterSystem : Node
             Face face = Faces.Instance.GetFace(faceCoords);
             face.SetWater(true);
         };
+        
+        // TODO: put a lot of water in one place with a control
+        // TODO: allow multiple waters to be on a face at once (this is weird but might be fun)
+        // TODO: ^ port water to this class instead of the faces.
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
