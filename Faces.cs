@@ -16,6 +16,8 @@ using System.Linq;
 
 public partial class Face : Node2D
 {
+    public static System.Random Random = new System.Random();
+    
     private Vector3 _sunVector = new Vector3(0, -1, (float)Math.Sin(Math.PI / 3));
     
     private Vector3I _coords;
@@ -255,6 +257,16 @@ public partial class Face : Node2D
         // what clock direction is the downward angle?
         // I guess it's the normal's  X,Y values
         Vector2 direction = new Vector2(normalVector.X, normalVector.Y);
+        
+        if (direction == new Vector2(0, 0))
+        {
+            float randomAngle = (float)(Math.PI * 2 * Face.Random.NextDouble());
+            
+            GD.Print("NORMAL (random)", normalVector);
+            return Vector2.Right.Rotated(randomAngle).Normalized();
+        }
+        
+        GD.Print("NORMAL", normalVector);
         return direction.Normalized();
     }
 }
