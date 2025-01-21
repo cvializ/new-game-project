@@ -58,14 +58,17 @@ public partial class Face : Node2D
             
             if (sorted[0] == dirSE)
             {
+                GD.Print("SE");
                 return _coords + deltaSE + new Vector3I(0, 0, 1);
             }
             if (sorted[0] == dirN)
             {
+                GD.Print("N");
                 return _coords + deltaN + new Vector3I(0, 0, 1);
             }
             if (sorted[0] == dirSW)
             {
+                GD.Print("SW");
                 return _coords + deltaSW + new Vector3I(0, 0, 1);
             }
             
@@ -91,14 +94,17 @@ public partial class Face : Node2D
         
         if (sortedBottom[0] == dirNW)
         {
+            GD.Print("NW");
             return _coords + deltaNW + new Vector3I(0, 0, -1);
         }
         if (sortedBottom[0] == dirS)
         {
+            GD.Print("S");
             return _coords + deltaS + new Vector3I(0, 0, -1);
         }
         if (sortedBottom[0] == dirNE)
         {
+            GD.Print("NE");
             return _coords + deltaNE + new Vector3I(0, 0, -1);
         }
 
@@ -141,8 +147,11 @@ public partial class Face : Node2D
             return;
         }
         
+                
         var downhill = GetDownhillDirection();
         var neighborCoords = GetNeighbor(downhill); // Is this working?
+        
+        GD.Print("FLOW DIRECTION ", downhill);
         
         var next = Faces.Instance.GetFace(neighborCoords);
         if (next.GetHasWater())
@@ -208,14 +217,13 @@ public partial class Face : Node2D
 
     private void _UpdateArrow()
     {
-        RemoveChild(_arrow);
-        
-        _arrow = new Arrow();
-        _arrow.Rotate(GetDownhillDirection().Angle());
-        _arrow.SetGlobalPosition(GetCenter());
-        
-        AddChild(_arrow);
-        
+        //RemoveChild(_arrow);
+        //
+        //_arrow = new Arrow();
+        //_arrow.Rotate(GetDownhillDirection().Angle());
+        //_arrow.SetGlobalPosition(GetCenter());
+        //
+        //AddChild(_arrow);
     }
 
     private void _Update()
