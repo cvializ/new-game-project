@@ -10,6 +10,7 @@ public partial class WaterUnit : Node
     public WaterUnit(Face face)
     {
         _currentFace = face;
+        face.SetWater(true);
     }
     
     public void Flow()
@@ -35,7 +36,7 @@ public partial class WaterUnit : Node
     public override void _Process(double delta)
     {
         cumulativeDelta += delta;
-        if (cumulativeDelta > .25)
+        if (cumulativeDelta > .1)
         {
             Flow();
             cumulativeDelta = 0;
@@ -48,32 +49,32 @@ public partial class WaterSystem : Node
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        //Cells.Instance.CellClick += (cell, index) =>
-        //{
-            //var oddQ = MathUtils.CubeToOddQ(cell.GetCoords());
-            //GD.Print("ODDQ", oddQ);
-            //
-            //var face = Faces.Instance.GetFace(new Vector3I(oddQ.X, oddQ.Y, 0));
-            ////face.Print();
-            //face.SetWater(true);
-        //};
-        
-        TileMapLayerTerrain.Instance.TileClick += (cellCubeCoords, tileMapMousePosition) =>
-        {;
-            Cell cell = Cells.Instance.GetCell(cellCubeCoords);
-            Vector2 localCoords = cell.ToLocal(tileMapMousePosition);
+        Cells.Instance.CellClick += (cell, vertex) =>
+        {
+            int radius = 4;
+            int N = radius;
             
-            double angle = (-localCoords.Angle() + Math.Tau) % Math.Tau;
-            
-            Vector3I faceCoords = Faces.Instance.GetFaceFromCellVertex(cellCubeCoords, angle);
-            
-            Face face = Faces.Instance.GetFace(faceCoords);
-            
-            WaterUnit unit = new WaterUnit(face);
-            AddChild(unit);
-            //face.SetWater(true);
+            for (int q = -N; q <= N; q++)
+            {
+                for (int r = -N; r <= N; r++)
+                {
+                    for (int s = -N; s <= N; s++)
+                    {
+                        if (q + r + s == 0)
+                        {
+                            Vector3I cellIndex = new Vector3I(q, r, s) + cell.GetCoords();
+                            Face[] faces = Cells.Instance.GetFaces(cellIndex);
+                            for (int i = 0; i < faces.Length; i++)
+                            {
+                                WaterUnit unit = new WaterUnit(faces[i]);
+                                AddChild(unit);
+                            }
+                        }
+                    }
+                }
+            }
         };
-        
+
         // TODO: put a lot of water in one place with a control
         // TODO: allow multiple waters to be on a face at once (this is weird but might be fun)
         // TODO: ^ port water to this class instead of the faces.

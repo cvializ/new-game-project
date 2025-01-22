@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
@@ -41,6 +42,22 @@ public partial class Cells : Node
         return _cellDict[cellCubeCoords];
     }
     
+    public Face[] GetFaces(Vector3I cellCubeCoords)
+    {
+        Cell cell = _cellDict[cellCubeCoords];
+        
+        List<Face> faces = new List<Face>();
+        for (double angle = 0; angle < 2 * Math.PI; angle += Math.PI / 3)
+        {
+            Vector3I faceCoords = Faces.Instance.GetFaceFromCellVertex(cell.GetCoords(), angle);
+            Face face = Faces.Instance.GetFace(faceCoords);
+            int index = (int)(angle / (Math.PI / 3));
+            faces.Add(face);
+        }
+        
+        return faces.ToArray();
+    }
+    //
     public int GetVertexIndexFromDirection(Vector2 direction)
     {
         double length = direction.Length();
