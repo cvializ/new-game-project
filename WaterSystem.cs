@@ -4,8 +4,43 @@ using System.Linq;
 
 public partial class WaterUnit : Node
 {
-    private Face _face;
+    private Face _currentFace;
+    //private Vector2I _momentum;
     
+    public WaterUnit(Face face)
+    {
+        _currentFace = face;
+    }
+    
+    public void Flow()
+    {
+        var downhill = _currentFace.GetDownhillDirection();
+        var neighborCoords = _currentFace.GetNeighbor(downhill);
+        
+        GD.Print("FLOW DIRECTION ", downhill);
+        
+        var nextFace = Faces.Instance.GetFace(neighborCoords);
+        if (nextFace.GetHasWater())
+        {
+            return;
+        }
+        
+        _currentFace.SetWater(false);
+        nextFace.SetWater(true);
+        
+        _currentFace = nextFace;
+    }
+    
+    private double cumulativeDelta = 0;
+    public override void _Process(double delta)
+    {
+        cumulativeDelta += delta;
+        if (cumulativeDelta > .25)
+        {
+            Flow();
+            cumulativeDelta = 0;
+        }
+    }
 }
 
 public partial class WaterSystem : Node
@@ -33,7 +68,10 @@ public partial class WaterSystem : Node
             Vector3I faceCoords = Faces.Instance.GetFaceFromCellVertex(cellCubeCoords, angle);
             
             Face face = Faces.Instance.GetFace(faceCoords);
-            face.SetWater(true);
+            
+            WaterUnit unit = new WaterUnit(face);
+            AddChild(unit);
+            //face.SetWater(true);
         };
         
         // TODO: put a lot of water in one place with a control

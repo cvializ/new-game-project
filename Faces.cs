@@ -38,81 +38,7 @@ public partial class Face : Node2D
     
     public Vector3I GetNeighbor(Vector2 direction)
     {
-        //GD.Print("Neighbor direction", direction);
-        bool isLeftTriangle = _coords.Z == 0;
-        
-        var deltaN = new Vector3I(0, -1, 0);
-        var deltaSE = new Vector3I(0, 0, 0);
-        var deltaSW = new Vector3I(-1, 0, 0);
-        
-        var dirSE = Vector2.Right.Rotated((float)(Math.PI / 3));
-        var dirN = Vector2.Right.Rotated((float)(-Math.PI / 2));
-        var dirSW = Vector2.Right.Rotated((float)(2 * Math.PI / 3));
-        
-        if (isLeftTriangle)
-        {
-            var dirs = new Vector2[] {
-                dirSE,
-                dirN,
-                dirSW,
-            };
-            var sorted = dirs.OrderBy(dir => direction.DistanceTo(dir)).ToArray();            
-            
-            if (sorted[0] == dirSE)
-            {
-                GD.Print("SE");
-                return _coords + deltaSE + new Vector3I(0, 0, 1);
-            }
-            if (sorted[0] == dirN)
-            {
-                GD.Print("N");
-                return _coords + deltaN + new Vector3I(0, 0, 1);
-            }
-            if (sorted[0] == dirSW)
-            {
-                GD.Print("SW");
-                return _coords + deltaSW + new Vector3I(0, 0, 1);
-            }
-            
-            return new Vector3I(-999, -999, -999);
-        }
-        
-        //GD.Print("bottom");
-        
-        var deltaS = -deltaN;
-        var deltaNW = -deltaSE;
-        var deltaNE = -deltaSW;
-        
-        var dirNW = Vector2.Right.Rotated((float)(-2 * Math.PI / 3));
-        var dirS = Vector2.Right.Rotated((float)(Math.PI / 2));
-        var dirNE = Vector2.Right.Rotated((float)(-Math.PI / 3));
-        
-        var dirsBottom = new Vector2[] {
-            dirNW,
-            dirS,
-            dirNE,
-        };
-        var sortedBottom = dirsBottom.OrderBy(dir => direction.DistanceSquaredTo(dir)).ToArray();
-        
-        if (sortedBottom[0] == dirNW)
-        {
-            GD.Print("NW");
-            return _coords + deltaNW + new Vector3I(0, 0, -1);
-        }
-        if (sortedBottom[0] == dirS)
-        {
-            GD.Print("S");
-            return _coords + deltaS + new Vector3I(0, 0, -1);
-        }
-        if (sortedBottom[0] == dirNE)
-        {
-            GD.Print("NE");
-            return _coords + deltaNE + new Vector3I(0, 0, -1);
-        }
-
-        //GD.Print(direction.Angle());
-        
-        return new Vector3I(-999, -999, -999);
+        return Faces.GetNeighbor(_coords, direction);
     }
 
     public void SetWater(bool hasWater)
@@ -126,44 +52,32 @@ public partial class Face : Node2D
         return _hasWater;
     }
     
-    private double cumulativeDelta = 0;
-    public override void _Process(double delta)
-    {
-        cumulativeDelta += delta;
-        if (cumulativeDelta > .25)
-        {
-            Flow();
-            cumulativeDelta = 0;
-        }
-    }
-    
     public Vector3I GetCoords()
     {
         return _coords;
     }
     
-    public void Flow()
-    {
-        if (!_hasWater)
-        {
-            return;
-        }
-        
-                
-        var downhill = GetDownhillDirection();
-        var neighborCoords = GetNeighbor(downhill); // Is this working?
-        
-        GD.Print("FLOW DIRECTION ", downhill);
-        
-        var next = Faces.Instance.GetFace(neighborCoords);
-        if (next.GetHasWater())
-        {
-            return;
-        }
-        
-        SetWater(false);    
-        next.SetWater(true);
-    }
+    //public void Flow()
+    //{
+        //if (!_hasWater)
+        //{
+            //return;
+        //}
+                //
+        //var downhill = GetDownhillDirection();
+        //var neighborCoords = GetNeighbor(downhill); // Is this working?
+        //
+        //GD.Print("FLOW DIRECTION ", downhill);
+        //
+        //var next = Faces.Instance.GetFace(neighborCoords);
+        //if (next.GetHasWater())
+        //{
+            //return;
+        //}
+        //
+        //SetWater(false);    
+        //next.SetWater(true);
+    //}
 
     public override void _Ready()
     {
@@ -173,7 +87,7 @@ public partial class Face : Node2D
         {
             vertex.OnHeightChange += (vertex, height) =>
             {
-                this._Update();
+                _Update();
             };
             Vector2 position = vertex.GetPosition();
             polygonPoints.Add(position);
@@ -217,8 +131,8 @@ public partial class Face : Node2D
 
     private Arrow _arrow;
 
-    private void _UpdateArrow()
-    {
+    //private void _UpdateArrow()
+    //{
         //RemoveChild(_arrow);
         //
         //_arrow = new Arrow();
@@ -226,7 +140,7 @@ public partial class Face : Node2D
         //_arrow.SetGlobalPosition(GetCenter());
         //
         //AddChild(_arrow);
-    }
+    //}
 
     private void _Update()
     {   
@@ -237,8 +151,6 @@ public partial class Face : Node2D
         var brightness = bounceVector.Dot(cameraVector);
         
         _polygon.SetColor(new Color(0, 0, _hasWater ? 1 : 0, 1 - brightness));
-        
-        _UpdateArrow();
     }
 
     public double GetSlope()
@@ -273,7 +185,6 @@ public partial class Faces : Node
 {   
     [Signal]
     public delegate void FaceClickEventHandler(Face face);
-    
     
     public static Faces Instance;
     public Faces()
@@ -357,6 +268,85 @@ public partial class Faces : Node
         
         var southNeighborOfRightNeighborCoords = rightNeighbor.GetNeighbor(Vector2.Down);
         return southNeighborOfRightNeighborCoords;
+    }
+    
+    public static Vector3I GetNeighbor(Vector3I _coords, Vector2 direction)
+    {
+        //GD.Print("Neighbor direction", direction);
+        bool isLeftTriangle = _coords.Z == 0;
+        
+        var deltaN = new Vector3I(0, -1, 0);
+        var deltaSE = new Vector3I(0, 0, 0);
+        var deltaSW = new Vector3I(-1, 0, 0);
+        
+        var dirSE = Vector2.Right.Rotated((float)(Math.PI / 3));
+        var dirN = Vector2.Right.Rotated((float)(-Math.PI / 2));
+        var dirSW = Vector2.Right.Rotated((float)(2 * Math.PI / 3));
+        
+        if (isLeftTriangle)
+        {
+            var dirs = new Vector2[] {
+                dirSE,
+                dirN,
+                dirSW,
+            };
+            var sorted = dirs.OrderBy(dir => direction.DistanceTo(dir)).ToArray();            
+            
+            if (sorted[0] == dirSE)
+            {
+                GD.Print("SE");
+                return _coords + deltaSE + new Vector3I(0, 0, 1);
+            }
+            if (sorted[0] == dirN)
+            {
+                GD.Print("N");
+                return _coords + deltaN + new Vector3I(0, 0, 1);
+            }
+            if (sorted[0] == dirSW)
+            {
+                GD.Print("SW");
+                return _coords + deltaSW + new Vector3I(0, 0, 1);
+            }
+            
+            return new Vector3I(-999, -999, -999);
+        }
+        
+        //GD.Print("bottom");
+        
+        var deltaS = -deltaN;
+        var deltaNW = -deltaSE;
+        var deltaNE = -deltaSW;
+        
+        var dirNW = Vector2.Right.Rotated((float)(-2 * Math.PI / 3));
+        var dirS = Vector2.Right.Rotated((float)(Math.PI / 2));
+        var dirNE = Vector2.Right.Rotated((float)(-Math.PI / 3));
+        
+        var dirsBottom = new Vector2[] {
+            dirNW,
+            dirS,
+            dirNE,
+        };
+        var sortedBottom = dirsBottom.OrderBy(dir => direction.DistanceSquaredTo(dir)).ToArray();
+        
+        if (sortedBottom[0] == dirNW)
+        {
+            GD.Print("NW");
+            return _coords + deltaNW + new Vector3I(0, 0, -1);
+        }
+        if (sortedBottom[0] == dirS)
+        {
+            GD.Print("S");
+            return _coords + deltaS + new Vector3I(0, 0, -1);
+        }
+        if (sortedBottom[0] == dirNE)
+        {
+            GD.Print("NE");
+            return _coords + deltaNE + new Vector3I(0, 0, -1);
+        }
+
+        //GD.Print(direction.Angle());
+        
+        return new Vector3I(-999, -999, -999);
     }
 
     public override void _Ready()
