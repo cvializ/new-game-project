@@ -32,7 +32,6 @@ public partial class Vertex : Node2D
     {
         _coords = coords;
         _height = height;
-        //_water = new WaterProperties();
         
         ViewControl.Instance.OnChangeShowVertices += (showVertices) => {
             _label.SetVisible(showVertices);

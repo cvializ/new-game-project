@@ -16,8 +16,6 @@ using System.Linq;
 
 public partial class Face : Node2D
 {
-    public static System.Random Random = new System.Random();
-    
     private Vector3 _sunVector = new Vector3(0, -1, (float)Math.Sin(Math.PI / 3));
     
     private Vector3I _coords;
@@ -56,28 +54,6 @@ public partial class Face : Node2D
     {
         return _coords;
     }
-    
-    //public void Flow()
-    //{
-        //if (!_hasWater)
-        //{
-            //return;
-        //}
-                //
-        //var downhill = GetDownhillDirection();
-        //var neighborCoords = GetNeighbor(downhill); // Is this working?
-        //
-        //GD.Print("FLOW DIRECTION ", downhill);
-        //
-        //var next = Faces.Instance.GetFace(neighborCoords);
-        //if (next.GetHasWater())
-        //{
-            //return;
-        //}
-        //
-        //SetWater(false);    
-        //next.SetWater(true);
-    //}
 
     public override void _Ready()
     {
@@ -129,7 +105,7 @@ public partial class Face : Node2D
         return faceNormalVector;
     }
 
-    private Arrow _arrow;
+    //private Arrow _arrow;
 
     //private void _UpdateArrow()
     //{
@@ -161,12 +137,6 @@ public partial class Face : Node2D
         double slope = Math.Tan(angle);
         
         return slope;
-    }
-
-    public Vector2 GetRandomDirection()
-    {
-        float randomAngle = (float)(Math.PI * 2 * Face.Random.NextDouble());
-        return Vector2.Right.Rotated(randomAngle).Normalized();
     }
 
     public Vector2 GetDownhillDirection()
@@ -222,8 +192,6 @@ public partial class Faces : Node
         Vector3I faceCoords = VertexToFace(cellCubeCoords);
         Face face = GetFace(faceCoords);
         
-        //var rotated = (angle + (4 * Math.PI / 3)) % (2 * Math.PI);
-        //var vertex = (int)Math.Round(angle / (Math.PI / 3));
         if (angle < Math.PI / 3)
         {
             return face.GetNeighbor(Vector2.Right);
@@ -267,6 +235,43 @@ public partial class Faces : Node
         
         var southNeighborOfRightNeighborCoords = rightNeighbor.GetNeighbor(Vector2.Down);
         return southNeighborOfRightNeighborCoords;
+    }
+    
+    public static bool IsLeftFace(Vector3I faceCoords)
+    {
+        return faceCoords.Z == 0;
+    }
+    
+    private static Vector3I[] LeftNeighbors = new Vector3I[] 
+    {
+        new Vector3I(0, -1, 1), // N
+        new Vector3I(-1, 0, 1), // SW
+        new Vector3I(0, 0, 1), // SE
+    };
+    
+    private static Vector3I[] RightNeighbors = new Vector3I[] 
+    {
+        new Vector3I(0, 1, 1), // S
+        new Vector3I(1, 0, 1), // NE
+        new Vector3I(0, 0, 1), // NW
+    };
+    
+    private static Vector3I mod = new Vector3I(int.MaxValue, int.MaxValue, 2);
+    
+    public static List<Vector3I> GetNeighbors(Vector3I _coords)
+    {
+        GD.Print($"neighbors? {_coords}");
+        if (IsLeftFace(_coords))
+        {
+            return LeftNeighbors.Select(difference => (_coords + difference) % mod).ToList();
+        }
+        
+        GD.Print("It's right!");
+        return RightNeighbors.Select(difference => {
+            var result = (_coords + difference) % mod;
+            GD.Print($"lol {result}");
+            return (_coords + difference) % mod;
+        }).ToList();
     }
     
     public static Vector3I GetNeighbor(Vector3I _coords, Vector2 direction)
