@@ -163,19 +163,18 @@ public partial class Face : Node2D
         return slope;
     }
 
+    public Vector2 GetRandomDirection()
+    {
+        float randomAngle = (float)(Math.PI * 2 * Face.Random.NextDouble());
+        return Vector2.Right.Rotated(randomAngle).Normalized();
+    }
+
     public Vector2 GetDownhillDirection()
     {
         var normalVector = _GetNormal();
         // what clock direction is the downward angle?
         // I guess it's the normal's  X,Y values
         Vector2 direction = new Vector2(normalVector.X, normalVector.Y);
-        
-        // What do we do if it's flat? Random direction I guess
-        if (direction == new Vector2(0, 0))
-        {
-            float randomAngle = (float)(Math.PI * 2 * Face.Random.NextDouble());
-            return Vector2.Right.Rotated(randomAngle).Normalized();
-        }
         
         return direction.Normalized();
     }
@@ -294,17 +293,17 @@ public partial class Faces : Node
             
             if (sorted[0] == dirSE)
             {
-                GD.Print("SE");
+                //GD.Print("SE");
                 return _coords + deltaSE + new Vector3I(0, 0, 1);
             }
             if (sorted[0] == dirN)
             {
-                GD.Print("N");
+                //GD.Print("N");
                 return _coords + deltaN + new Vector3I(0, 0, 1);
             }
             if (sorted[0] == dirSW)
             {
-                GD.Print("SW");
+                //GD.Print("SW");
                 return _coords + deltaSW + new Vector3I(0, 0, 1);
             }
             
@@ -330,17 +329,17 @@ public partial class Faces : Node
         
         if (sortedBottom[0] == dirNW)
         {
-            GD.Print("NW");
+            //GD.Print("NW");
             return _coords + deltaNW + new Vector3I(0, 0, -1);
         }
         if (sortedBottom[0] == dirS)
         {
-            GD.Print("S");
+            //GD.Print("S");
             return _coords + deltaS + new Vector3I(0, 0, -1);
         }
         if (sortedBottom[0] == dirNE)
         {
-            GD.Print("NE");
+            //GD.Print("NE");
             return _coords + deltaNE + new Vector3I(0, 0, -1);
         }
 

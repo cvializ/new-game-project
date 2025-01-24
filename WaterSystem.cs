@@ -5,26 +5,41 @@ using System.Linq;
 public partial class WaterUnit : Node
 {
     private Face _currentFace;
-    //private Vector2I _momentum;
+    private Vector2 _momentum;
     
-    public WaterUnit(Face face)
+    public WaterUnit(Face face) : this(face, new Vector2(0, 0)) {}
+    
+    public WaterUnit(Face face, Vector2 momentum)
     {
         _currentFace = face;
+        _momentum = momentum;
+        
         face.SetWater(true);
     }
     
     public void Flow()
     {
-        var downhill = _currentFace.GetDownhillDirection();
+        var downhill = _currentFace.GetDownhillDirection() + _momentum;
+        //var downhill = _currentFace.GetDownhillDirection();
+        
+        if (downhill == new Vector2(0, 0))
+        {
+            downhill = _currentFace.GetRandomDirection();
+        }
+        
         var neighborCoords = _currentFace.GetNeighbor(downhill);
         
-        GD.Print("FLOW DIRECTION ", downhill);
+        //GD.Print("FLOW DIRECTION ", downhill);
         
         var nextFace = Faces.Instance.GetFace(neighborCoords);
         if (nextFace.GetHasWater())
         {
-            return;
+            downhill = _currentFace.GetRandomDirection();
+            //return;
         }
+        
+        _momentum += nextFace.GetDownhillDirection();
+        //_momentum = new Vector2(0, 0);
         
         _currentFace.SetWater(false);
         nextFace.SetWater(true);
@@ -51,7 +66,7 @@ public partial class WaterSystem : Node
     {
         Cells.Instance.CellClick += (cell, vertex) =>
         {
-            int radius = 4;
+            int radius = 2;
             int N = radius;
             
             for (int q = -N; q <= N; q++)
