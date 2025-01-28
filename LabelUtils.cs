@@ -25,54 +25,35 @@ public partial class LabelUtils : Godot.Node
 
 public partial class MyLabel : Godot.Node2D
 {
-    private string _text;
-    public MyLabel(): this("[todo]") {}
+    private Label _label;
+    public MyLabel(): this(new Label()) {}
     
-    public MyLabel(string text)
+    public MyLabel(Label label)
     {
-        this._text = text;
+        _label = label;
+    }
+    
+    public MyLabel(string text) : this(new Label())
+    {
+        _label.Text = text;
+    }
+
+    
+    public void SetText(string text)
+    {
+        _label.Text = text;
     }
     
     public override void _Ready()
     {
-        var label = new Label();
         var theme = (Theme)ResourceLoader.Load("res://new_theme.tres", "Theme");
-        var size = theme.DefaultFont.GetStringSize(_text);
+        var size = theme.DefaultFont.GetStringSize(_label.Text);
+        //GD.Print("string size", size);
+        _label.SetTheme(theme);
+        _label.SetPosition(new Vector2(-3, -7)); // one digit I guess
+        _label.SetZIndex(1);
 
-        label.SetTheme(theme);
-        label.SetText(_text);
-
-        label.SetPosition(new Vector2(-3, -7));
-        label.SetZIndex(1);
-
-        this.AddChild(label);
-    }
-    
-}
-
-
-public partial class MyOffsetLabel : Godot.Node2D
-{
-    private string _text;
-    public MyOffsetLabel(): this("[todo]") {}
-    public MyOffsetLabel(string text)
-    {
-        this._text = text;
-    }
-    
-    public override void _Ready()
-    {
-        var label = new Label();
-        var theme = (Theme)ResourceLoader.Load("res://new_theme.tres", "Theme");
-        var size = theme.DefaultFont.GetStringSize(_text);
-
-        label.SetTheme(theme);
-        label.SetText(_text);
-
-        label.SetPosition(new Vector2(110, -7));
-        label.SetZIndex(1);
-
-        this.AddChild(label);
+        AddChild(_label);
     }
     
 }

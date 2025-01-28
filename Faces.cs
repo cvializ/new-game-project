@@ -260,16 +260,16 @@ public partial class Faces : Node
     
     public static List<Vector3I> GetNeighbors(Vector3I _coords)
     {
-        GD.Print($"neighbors? {_coords}");
+        //GD.Print($"neighbors? {_coords}");
         if (IsLeftFace(_coords))
         {
             return LeftNeighbors.Select(difference => (_coords + difference) % mod).ToList();
         }
         
-        GD.Print("It's right!");
+        //GD.Print("It's right!");
         return RightNeighbors.Select(difference => {
             var result = (_coords + difference) % mod;
-            GD.Print($"lol {result}");
+            //GD.Print($"lol {result}");
             return (_coords + difference) % mod;
         }).ToList();
     }

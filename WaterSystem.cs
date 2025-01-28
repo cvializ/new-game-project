@@ -3,24 +3,58 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class WaterUnit : Node
+public partial class WaterUnit : Node2D
 {
     public static System.Random Random = new System.Random();
 
     private float _rate = 1;
     private float _amount = 0;
     private Face _currentFace;
+    private MyLabel _label;
     //private Vector2 _momentum;
     
-    public WaterUnit(Face face) : this(face, 1f) {}
+    public WaterUnit(Face face) : this(face, 0f) {}
     
     public WaterUnit(Face face, float amount)
     {
         _currentFace = face;
         _amount = amount;
+        _label = new MyLabel($"{_amount}");;
+        AddChild(_label);
         //_momentum = momentum;
         
         face.SetWater(true);
+        SetGlobalPosition(face.GetCenter());
+    }
+    
+    public Vector3I GetCoords()
+    {
+        return _currentFace.GetCoords();
+    }
+    
+    public void _Update()
+    {
+        _label.SetText(_amount.ToString("n2"));
+    }
+    
+    protected void SetAmount(float amount)
+    {        
+        _amount = Math.Abs(amount) <= .01 ? 0 : amount;
+        _amount = Math.Abs(_amount) > 100 ? 100 : _amount;
+        GD.Print($"SetAmount {_amount}");
+        
+        if (_amount == 0)
+        {
+            WaterSystem.Instance.RemoveChild(this);
+            _currentFace.SetWater(false);
+        }
+        
+        _Update();
+    }
+    
+    public void AddAmount(float amount)
+    {
+        SetAmount(_amount + amount);
     }
     
     public Vector2 GetRandomDirection()
@@ -35,36 +69,64 @@ public partial class WaterUnit : Node
     
     private Vector2[] Axes = new Vector2[] { AxisNS, AxisSwNe, AxisSeNw };
     
+    private bool ReceivesFlow(float coefficient)
+    {
+        bool isDownhillAligned = coefficient > 0;
+        bool isZero = Math.Abs(coefficient) <= float.Epsilon;
+        return isZero || isDownhillAligned;
+    }
+    
     public void Flow()
     {
+        GD.Print($"FLOW {_amount}");
+        if (_amount == 1)
+        {
+            return;
+        }
         // N, SW, SE or S, NE, NW. Same axes whether left or right
         List<Vector3I> waterDestinations = Faces.GetNeighbors(_currentFace.GetCoords());
         
         bool isLeft = Faces.IsLeftFace(_currentFace.GetCoords());
         
         Vector2 downhillDirection = _currentFace.GetDownhillDirection();
-        GD.Print($"downhill {downhillDirection}");
+        //GD.Print($"downhill {downhillDirection}");
         
         List<float> coefficients = Axes
             //.Select(axis => axis.Dot(downhillDirection)).ToList();
             .Select(axis => (axis * (isLeft ? 1 : -1)).Dot(downhillDirection)).ToList();
         
+        GD.Print(string.Join(",", coefficients));
+        
+        int directionsToFlow = coefficients.Select(coefficient => ReceivesFlow(coefficient)).Count();
+
+        // TODO: backpressure?
+        
+        GD.Print("directionsToFlow", directionsToFlow);
+        
         for (int i = 0; i < coefficients.Count; i++)
         {
             float coefficient = coefficients[i];
-            
-            GD.Print($"coeff {coefficient}");
-            
-            if (Math.Abs(coefficient) > float.Epsilon && coefficient < 0)
+            // We need to preserve the index, so we can't just filter it out of the list
+            // and we continue instead.
+            if (!ReceivesFlow(coefficient))
             {
+                GD.Print($"coefficient {coefficient} no");
                 continue;
             }
+            GD.Print($"coefficient {coefficient}");
+            
+            float flowAmount = (1 - coefficient); // 0 coefficient means perfectly aligned right?
 
             Face face = Faces.Instance.GetFace(waterDestinations[i]);
             face.SetWater(true);
             
-            GD.Print($"next: ${waterDestinations[i]}");
-            WaterSystem.Instance.GetOrCreateWaterUnit(waterDestinations[i]);
+            //GD.Print($"next: ${waterDestinations[i]}");
+            WaterUnit unit = WaterSystem.Instance.GetOrCreateWaterUnit(waterDestinations[i]);
+            unit.AddAmount(_amount / directionsToFlow * flowAmount);
+            
+            GD.Print($"unit {unit.GetCoords()} amount {_amount * flowAmount}"); 
+            
+            AddAmount(-(_amount / directionsToFlow * flowAmount));
         }
         
         //var downhill = _currentFace.GetDownhillDirection() + _momentum;
@@ -94,11 +156,6 @@ public partial class WaterUnit : Node
         //
         //_currentFace = nextFace;
     }
-    
-    //public override void _Ready()
-    //{
-        //Flow();
-    //}
     
     private double cumulativeDelta = 0;
     public override void _Process(double delta)
@@ -165,8 +222,8 @@ public partial class WaterSystem : Node
         
         Faces.Instance.FaceClick += (face) => 
         {
-            WaterUnit unit = new WaterUnit(face);
-            AddChild(unit);
+            WaterUnit unit = WaterSystem.Instance.GetOrCreateWaterUnit(face.GetCoords());
+            unit.AddAmount(1f);
         };
 
         // TODO: allow multiple waters to be on a face at once (this is weird but might be fun)
