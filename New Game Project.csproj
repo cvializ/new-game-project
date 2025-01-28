@@ -6,4 +6,7 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>NewGameProject</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="rationals" Version="2.3.0" />
+  </ItemGroup>
 </Project>
