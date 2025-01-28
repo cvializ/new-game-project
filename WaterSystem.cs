@@ -8,7 +8,7 @@ public partial class WaterUnit : Node2D
 {
     public static System.Random Random = new System.Random();
 
-    private float _rate = 1;
+    private float _rate = .05f;
     private float _amount = 0;
     private Face _face;
     private MyLabel _label;
@@ -20,7 +20,8 @@ public partial class WaterUnit : Node2D
     {
         _face = face;
         _amount = amount;
-        _label = new MyLabel($"{_amount}");;
+        _label = new MyLabel($"{_amount}");
+        _label.Visible = false;
         AddChild(_label);
         //_momentum = momentum;
         
@@ -41,6 +42,7 @@ public partial class WaterUnit : Node2D
     protected void SetAmount(float amount)
     {        
         _amount = amount;
+        _face.SetWater(_amount > 0);
         _Update();
         
         //_amount = Math.Abs(amount) <= .01 ? 0 : amount;
@@ -89,7 +91,6 @@ public partial class WaterUnit : Node2D
     {
         if (GetAmount() < 0.005)
         {
-            _face.SetWater(false);
             // Delete node??
             return;
         }
@@ -129,7 +130,7 @@ public partial class WaterUnit : Node2D
                 continue;
             }
             
-            float amount = _amount / directionsToFlow;
+            float amount = (_amount - _rate) / directionsToFlow;
             
             Face face = Faces.Instance.GetFace(waterDestinations[i]);
             
@@ -288,7 +289,7 @@ public partial class WaterSystem : Node
         Faces.Instance.FaceClick += (face) => 
         {
             WaterUnit unit = WaterSystem.Instance.GetOrCreateWaterUnit(face.GetCoords());
-            unit.AddAmount(1);
+            unit.AddAmount(100);
         };
 
         // TODO: allow multiple waters to be on a face at once (this is weird but might be fun)
